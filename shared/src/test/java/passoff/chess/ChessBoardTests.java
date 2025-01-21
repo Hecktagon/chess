@@ -17,14 +17,22 @@ public class ChessBoardTests {
         ChessPiece piece = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
 
         var board = new ChessBoard();
+
+        System.out.print("\n\n[Before Add]\n\n");
+
         board.addPiece(position, piece);
+
+        System.out.print("\n\n[After Add]\n\n");
 
         ChessPiece foundPiece = board.getPiece(position);
 
+        String string_piece = piece.toString();
+        String string_foundPiece = foundPiece.toString();
+
         Assertions.assertEquals(piece.getPieceType(), foundPiece.getPieceType(),
-                "ChessPiece returned by getPiece had the wrong piece type");
+                "ChessPiece " + string_foundPiece + " returned by getPiece had the wrong piece type. Expected: " + string_piece);
         Assertions.assertEquals(piece.getTeamColor(), foundPiece.getTeamColor(),
-                "ChessPiece returned by getPiece had the wrong team color");
+                "ChessPiece " + string_foundPiece + " returned by getPiece had the wrong team color. Expected: " + string_piece);
     }
 
 
@@ -33,8 +41,16 @@ public class ChessBoardTests {
     public void defaultGameBoard() {
         var expectedBoard = TestUtilities.defaultBoard();
 
+        System.out.print("\n\n[Expected:]\n\n");
+
+        expectedBoard.printBoard();
+
         var actualBoard = new ChessBoard();
         actualBoard.resetBoard();
+
+        System.out.print("\n\n[Actual:]\n\n");
+
+        actualBoard.printBoard();
 
         Assertions.assertEquals(expectedBoard, actualBoard);
     }

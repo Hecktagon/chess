@@ -52,4 +52,21 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         throw new RuntimeException("ChessPiece pieceMoves Not implemented");
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        System.out.print("\n\nCALLED ChessPiece.equals()\n\n");
+        if (obj instanceof ChessPiece) {
+            ChessPiece otherPiece = (ChessPiece) obj;
+            return this._teamColor == otherPiece._teamColor && this._pieceType == otherPiece._pieceType;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int colorCode = this._teamColor == ChessGame.TeamColor.WHITE ? 1 : 0;
+        int typeCode = this._pieceType.ordinal();
+        return colorCode + typeCode;
+    }
 }

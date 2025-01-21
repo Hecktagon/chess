@@ -29,4 +29,18 @@ public class ChessPosition {
     public int getColumn() {
         return this._col;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ChessPosition) {
+            ChessPosition otherPos = (ChessPosition) obj;
+            return this._row == otherPos._row && this._col == otherPos._col;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return (7 ^ this._row ) + (122 ^ this._col);
+    }
 }
