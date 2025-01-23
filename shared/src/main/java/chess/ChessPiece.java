@@ -9,12 +9,12 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessPiece {
-    private ChessGame.TeamColor _teamColor;
-    private ChessPiece.PieceType _pieceType;
+    private ChessGame.TeamColor teamColor;
+    private ChessPiece.PieceType pieceType;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        this._teamColor = pieceColor;
-        this._pieceType = type;
+        this.teamColor = pieceColor;
+        this.pieceType = type;
     }
 
     /**
@@ -33,14 +33,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        return this._teamColor;
+        return this.teamColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        return this._pieceType;
+        return this.pieceType;
     }
 
     /**
@@ -59,15 +59,15 @@ public class ChessPiece {
         System.out.print("\n\nCALLED ChessPiece.equals()\n\n");
         if (obj instanceof ChessPiece) {
             ChessPiece otherPiece = (ChessPiece) obj;
-            return this._teamColor == otherPiece._teamColor && this._pieceType == otherPiece._pieceType;
+            return this.teamColor == otherPiece.teamColor && this.pieceType == otherPiece.pieceType;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        int colorCode = this._teamColor == ChessGame.TeamColor.WHITE ? 1 : 0;
-        int typeCode = this._pieceType.ordinal();
+        int colorCode = this.teamColor == ChessGame.TeamColor.WHITE ? 1 : 0;
+        int typeCode = this.pieceType.ordinal();
         return colorCode + typeCode;
     }
 }
