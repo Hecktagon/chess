@@ -15,6 +15,7 @@ public class ChessPosition {
     public ChessPosition(int row, int col) {
         this._row = row;
         this._col = col;
+//        System.out.printf("\n\nRow: %s\nCol: %s", row, col);
     }
 
     /**

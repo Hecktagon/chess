@@ -48,7 +48,7 @@ public class ChessPiece {
 
     private Moves getPieceMoves(PieceType pieceType) {
         HashMap<PieceType, Moves> movesMap = new HashMap<>();
-//        movesMap.put(PieceType.KING, new MovesKing());
+        movesMap.put(PieceType.KING, new MovesKing());
 //        movesMap.put(PieceType.QUEEN, new MovesQueen());
         movesMap.put(PieceType.BISHOP, new MovesBishop());
 //        movesMap.put(PieceType.KNIGHT, new MovesKnight());
@@ -73,7 +73,47 @@ public class ChessPiece {
             return null;
         } else {
             Moves movesClass = getPieceMoves(myPiece.getPieceType());
-            return movesClass.pieceMoves(board, myPosition);
+            Collection<ChessMove> moves = movesClass.pieceMoves(board, myPosition);
+            printMoves(board, myPosition, moves);
+            return moves;
+        }
+    }
+
+    public String getPieceShortcut(ChessPiece piece){
+        HashMap<PieceType, String> shortcutMap = new HashMap<>();
+        shortcutMap.put(PieceType.KING, "K");
+        shortcutMap.put(PieceType.QUEEN, "Q");
+        shortcutMap.put(PieceType.ROOK, "R");
+        shortcutMap.put(PieceType.BISHOP, "B");
+        shortcutMap.put(PieceType.KNIGHT, "N");
+        shortcutMap.put(PieceType.PAWN, "P");
+        return shortcutMap.get(piece.pieceType);
+    }
+
+    public void printMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves){
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                System.out.print("|");
+                ChessPosition currPosition = new ChessPosition(i, j);
+                ChessMove currMove = new ChessMove(myPosition, currPosition, null);
+                ChessPiece currPiece = board.getPiece(currPosition);
+
+                if (currPiece == null) {
+                    if (moves.contains(currMove)) {
+                        System.out.print("#");
+                    } else {
+                        System.out.print(" ");
+                    }
+
+                } else {
+                    if (currPiece.getTeamColor() == ChessGame.TeamColor.WHITE){
+                        System.out.print(getPieceShortcut(currPiece));
+                    } else {
+                        System.out.print(getPieceShortcut(currPiece).toLowerCase());
+                    }
+                }
+            }
+            System.out.print("|\n");
         }
     }
 

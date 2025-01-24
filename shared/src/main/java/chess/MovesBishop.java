@@ -4,18 +4,33 @@ import java.util.HashSet;
 
 public class MovesBishop implements Moves{
     public boolean inBounds(int num){
-        return 0 <= num && num <= 7;
+        return 1 <= num && num <= 8;
     }
 
     public HashSet<ChessMove> diagonalChecker(boolean xDirection, boolean yDirection, ChessBoard board, ChessPosition position){
         HashSet<ChessMove> diagonal = new HashSet<ChessMove>();
-        int xPosition = position.getColumn() -1;
-        int yPosition = position.getRow() -1;
+        int xPosition = position.getRow();
+        int yPosition = position.getColumn();
         ChessPiece currentPiece = (ChessPiece) board.getPiece(position);
         ChessPosition endPosition;
 
+        if (xDirection){
+            xPosition++;
+        } else {
+            xPosition--;
+        }
+        // set y direction based on input
+        if (yDirection){
+            yPosition++;
+        } else {
+            yPosition--;
+        }
+
         // checking a diagonal
         while (inBounds(xPosition) && inBounds(yPosition)) {
+            endPosition = new ChessPosition(xPosition, yPosition);
+            ChessPiece endPiece = (ChessPiece) board.getPiece(endPosition);
+
             // set x direction based on input
             if (xDirection){
                 xPosition++;
@@ -28,9 +43,6 @@ public class MovesBishop implements Moves{
             } else {
                 yPosition--;
             }
-
-            endPosition = new ChessPosition(xPosition, yPosition);
-            ChessPiece endPiece = (ChessPiece) board.getPiece(endPosition);
 
             // empty space, keep going
             if (endPiece == null) {
