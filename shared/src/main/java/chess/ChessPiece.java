@@ -1,6 +1,9 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+
 
 /**
  * Represents a single chess piece
@@ -43,6 +46,19 @@ public class ChessPiece {
         return this.pieceType;
     }
 
+    private Moves getPieceMoves(PieceType pieceType) {
+        HashMap<PieceType, Moves> movesMap = new HashMap<>();
+//        movesMap.put(PieceType.KING, new MovesKing());
+//        movesMap.put(PieceType.QUEEN, new MovesQueen());
+        movesMap.put(PieceType.BISHOP, new MovesBishop());
+//        movesMap.put(PieceType.KNIGHT, new MovesKnight());
+//        movesMap.put(PieceType.ROOK, new MovesRook());
+//        movesMap.put(PieceType.PAWN, new MovesPawn());
+
+        return movesMap.get(pieceType);
+    }
+
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -51,7 +67,14 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("ChessPiece pieceMoves Not implemented");
+        System.out.print("\n\nCALLED ChessPiece.pieceMoves()\n\n");
+        ChessPiece myPiece = (ChessPiece) board.getPiece(myPosition);
+        if (myPiece == null) {
+            return null;
+        } else {
+            Moves movesClass = getPieceMoves(myPiece.getPieceType());
+            return movesClass.pieceMoves(board, myPosition);
+        }
     }
 
     @Override

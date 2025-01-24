@@ -9,8 +9,8 @@ public class MovesBishop implements Moves{
 
     public HashSet<ChessMove> diagonalChecker(boolean xDirection, boolean yDirection, ChessBoard board, ChessPosition position){
         HashSet<ChessMove> diagonal = new HashSet<ChessMove>();
-        int xPosition = position.getColumn();
-        int yPosition = position.getRow();
+        int xPosition = position.getColumn() -1;
+        int yPosition = position.getRow() -1;
         ChessPiece currentPiece = (ChessPiece) board.getPiece(position);
         ChessPosition endPosition;
 
