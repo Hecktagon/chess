@@ -51,7 +51,7 @@ public class ChessPiece {
         movesMap.put(PieceType.KING, new MovesKing());
 //        movesMap.put(PieceType.QUEEN, new MovesQueen());
         movesMap.put(PieceType.BISHOP, new MovesBishop());
-//        movesMap.put(PieceType.KNIGHT, new MovesKnight());
+        movesMap.put(PieceType.KNIGHT, new MovesKnight());
 //        movesMap.put(PieceType.ROOK, new MovesRook());
 //        movesMap.put(PieceType.PAWN, new MovesPawn());
 
