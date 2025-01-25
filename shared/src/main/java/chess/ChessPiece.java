@@ -14,10 +14,13 @@ import java.util.HashSet;
 public class ChessPiece {
     private ChessGame.TeamColor teamColor;
     private ChessPiece.PieceType pieceType;
+//    private boolean hasMoved;
+
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.teamColor = pieceColor;
         this.pieceType = type;
+//        this.hasMoved = false;
     }
 
     /**
@@ -32,6 +35,9 @@ public class ChessPiece {
         PAWN
     }
 
+//    public boolean getHasMoved(){
+//        return hasMoved;
+//    }
     /**
      * @return Which team this chess piece belongs to
      */
@@ -49,11 +55,11 @@ public class ChessPiece {
     private Moves getPieceMoves(PieceType pieceType) {
         HashMap<PieceType, Moves> movesMap = new HashMap<>();
         movesMap.put(PieceType.KING, new MovesKing());
-//        movesMap.put(PieceType.QUEEN, new MovesQueen());
+        movesMap.put(PieceType.QUEEN, new MovesQueen());
         movesMap.put(PieceType.BISHOP, new MovesBishop());
         movesMap.put(PieceType.KNIGHT, new MovesKnight());
-//        movesMap.put(PieceType.ROOK, new MovesRook());
-//        movesMap.put(PieceType.PAWN, new MovesPawn());
+        movesMap.put(PieceType.ROOK, new MovesRook());
+        movesMap.put(PieceType.PAWN, new MovesPawn());
 
         return movesMap.get(pieceType);
     }
