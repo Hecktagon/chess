@@ -1,9 +1,8 @@
 package chess;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -12,67 +11,43 @@ import java.util.Optional;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private Object[][] board;
+    ChessPiece[][] board;
 
     public ChessBoard() {
-        board = new Object[8][8];
-//        initialize_board();
-//        printBoard();
+        board = new ChessPiece[8][8];
     }
 
-    private void initialize_board() {
-        board[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
-        board[0][1] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
-        board[0][2] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
-        board[0][3] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
-        board[0][4] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
-        board[0][5] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
-        board[0][6] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
-        board[0][7] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
-
-        board[7][0] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
-        board[7][1] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
-        board[7][2] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
-        board[7][3] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
-        board[7][4] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
-        board[7][5] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
-        board[7][6] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
-        board[7][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
-
-        for(int i = 0; i < 8; i++) {
-            board[1][i] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-            board[6][i] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+    public String shortcutMap(ChessPiece piece){
+        if (piece == null){
+            return " ";
         }
-    }
+        ChessPiece.PieceType type = piece.getPieceType();
+        ChessGame.TeamColor color = piece.getTeamColor();
+        HashMap<ChessPiece.PieceType, String> shortcuts = new HashMap<>();
 
-    public String getPieceShortcut(ChessPiece piece){
-        HashMap<ChessPiece.PieceType, String> shortcutMap = new HashMap<>();
-        shortcutMap.put(ChessPiece.PieceType.KING, "K");
-        shortcutMap.put(ChessPiece.PieceType.QUEEN, "Q");
-        shortcutMap.put(ChessPiece.PieceType.ROOK, "R");
-        shortcutMap.put(ChessPiece.PieceType.BISHOP, "B");
-        shortcutMap.put(ChessPiece.PieceType.KNIGHT, "N");
-        shortcutMap.put(ChessPiece.PieceType.PAWN, "P");
-        return shortcutMap.get(piece.getPieceType());
+        shortcuts.put(ChessPiece.PieceType.QUEEN, "Q");
+        shortcuts.put(ChessPiece.PieceType.KING, "K");
+        shortcuts.put(ChessPiece.PieceType.ROOK, "R");
+        shortcuts.put(ChessPiece.PieceType.KNIGHT, "N");
+        shortcuts.put(ChessPiece.PieceType.BISHOP, "B");
+        shortcuts.put(ChessPiece.PieceType.PAWN, "P");
+
+        String shortcut = shortcuts.get(type);
+
+        if (color == ChessGame.TeamColor.BLACK){
+            shortcut = shortcut.toLowerCase();
+        }
+
+        return shortcut;
     }
 
     public void printBoard(){
         System.out.print("\n");
-        for (int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
+        for(int i = 7; i >= 0; i--){
+            for(int j = 0; j < 8; j++){
+                ChessPiece currPiece = (ChessPiece) board[i][j];
                 System.out.print("|");
-                ChessPosition currPosition = new ChessPosition(i, j);
-                ChessPiece currPiece = getPiece(currPosition);
-
-                if (currPiece == null) {
-                    System.out.print(" ");
-                } else {
-                    if (currPiece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                        System.out.print(getPieceShortcut(currPiece));
-                    } else {
-                        System.out.print(getPieceShortcut(currPiece).toLowerCase());
-                    }
-                }
+                System.out.print(shortcutMap(currPiece));
             }
             System.out.print("|\n");
         }
@@ -97,75 +72,81 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return (ChessPiece) board[position.getRow()-1][position.getColumn()-1];
+        return board[position.getRow()-1][position.getColumn()-1];
     }
+
+    // returns [valid, captured]
+    public boolean[] isValidMove(ChessMove move){
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+
+        if (!start.posInBounds() || !end.posInBounds()){
+            System.err.print("failed ChessBoard.isValidMove: start or end position is out of bounds.");
+            return new boolean[] {false, false};
+        }
+
+        ChessPiece myPiece = getPiece(start);
+        ChessGame.TeamColor myTeam = myPiece.getTeamColor();
+        ChessPiece targetPiece = getPiece(end);
+        ChessGame.TeamColor targetTeam;
+        if (targetPiece != null) {
+            targetTeam = targetPiece.getTeamColor();
+            if (targetTeam != myTeam) {
+                return new boolean[] {true, true};
+            } else {
+                return new boolean[] {false, false};
+            }
+        } else {
+            return new boolean[] {true, false};
+        }
+
+    }
+
 
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        board = new Object[8][8];
-        initialize_board();
+        board = new ChessPiece[8][8];
+        for(int i = 0; i < 8; i++){
+            board[1][i] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+            board[6][i] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+        }
+
+        board[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        board[0][1] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+        board[0][2] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+        board[0][3] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+        board[0][4] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
+        board[0][5] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+        board[0][6] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+        board[0][7] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+
+        board[7][0] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+        board[7][1] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+        board[7][2] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+        board[7][3] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
+        board[7][4] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
+        board[7][5] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+        board[7][6] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+        board[7][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+
+        System.out.print("\nBoard Reset:\n");
+        printBoard();
     }
 
     @Override
-    public boolean equals(Object obj) {
-        System.out.print("\n\nCALLED ChessBoard.equals()\n\n");
-        if(obj instanceof ChessBoard) {
-            ChessBoard other = (ChessBoard) obj;
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
-                    if (board[i][j] instanceof ChessPiece && other.board[i][j] instanceof ChessPiece) {
-                        if (!board[i][j].equals(other.board[i][j])) {
-                            return false;
-                        }
-                    }
-                    else{
-                        if (board[i][j] == null && other.board[i][j] == null) {
-                            continue;
-                        }
-                        else if (board[i][j] == null && other.board[i][j] != null) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
-        return false;
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(board, that.board);
     }
 
     @Override
     public int hashCode() {
-        int hashCode = 1;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (board[i][j] instanceof ChessPiece) {
-                    ChessPiece piece = (ChessPiece) board[i][j];
-                    if ((j > 1) && (j % 4 == 0)) {
-                        hashCode = hashCode^piece.hashCode();
-                    }
-                    else if (i % 2 == 0) {
-                        hashCode += piece.hashCode();
-                    }
-                    else{
-                        hashCode *= piece.hashCode();
-                    }
-                }
-                else{
-                    if ((j > 1) && (j % 4 == 0)) {
-                        hashCode = hashCode^(i + j);
-                    }
-                    else if (i % 2 == 0) {
-                        hashCode += (i * j);
-                    }
-                    else{
-                        hashCode *= (i + 1) + (j + 1);
-                    }
-                }
-            }
-        }
-        return hashCode;
+        return Arrays.deepHashCode(board);
     }
 }

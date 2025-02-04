@@ -3,7 +3,7 @@ package chess;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -11,16 +11,35 @@ import java.util.HashSet;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessPiece {
-    private ChessGame.TeamColor teamColor;
-    private ChessPiece.PieceType pieceType;
-//    private boolean hasMoved;
 
+
+public class ChessPiece {
+    ChessGame.TeamColor teamColor;
+    ChessPiece.PieceType pieceType;
+    boolean hasMoved;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        this.teamColor = pieceColor;
-        this.pieceType = type;
-//        this.hasMoved = false;
+        teamColor = pieceColor;
+        pieceType = type;
+        hasMoved = false;
+    }
+
+    public void printMoves(ChessBoard board, ChessPosition myPos, HashSet<ChessMove> moves){
+        System.out.print("\n");
+        for(int i = 8; i > 0; i--){
+            for(int j = 1; j <= 8; j++){
+                ChessPosition curPos = new ChessPosition(i, j);
+                ChessPiece curPiece = (ChessPiece) board.getPiece(curPos);
+                System.out.print("|");
+                if (curPiece == null && moves.contains(new ChessMove(myPos, curPos, null))){
+                    System.out.print("#");
+                } else {
+                    System.out.print(board.shortcutMap(curPiece));
+                }
+            }
+            System.out.print("|\n");
+        }
+        System.out.print("\n");
     }
 
     /**
@@ -35,35 +54,19 @@ public class ChessPiece {
         PAWN
     }
 
-//    public boolean getHasMoved(){
-//        return hasMoved;
-//    }
     /**
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        return this.teamColor;
+        return teamColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        return this.pieceType;
+        return pieceType;
     }
-
-    private Moves getPieceMoves(PieceType pieceType) {
-        HashMap<PieceType, Moves> movesMap = new HashMap<>();
-        movesMap.put(PieceType.KING, new MovesKing());
-        movesMap.put(PieceType.QUEEN, new MovesQueen());
-        movesMap.put(PieceType.BISHOP, new MovesBishop());
-        movesMap.put(PieceType.KNIGHT, new MovesKnight());
-        movesMap.put(PieceType.ROOK, new MovesRook());
-        movesMap.put(PieceType.PAWN, new MovesPawn());
-
-        return movesMap.get(pieceType);
-    }
-
 
     /**
      * Calculates all the positions a chess piece can move to
@@ -72,71 +75,109 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        System.out.print("\n\nCALLED ChessPiece.pieceMoves()\n\n");
-        ChessPiece myPiece = (ChessPiece) board.getPiece(myPosition);
-        if (myPiece == null) {
-            return null;
+    public Moves typeMove(ChessPiece.PieceType type){
+        HashMap<PieceType, Moves> typeMap = new HashMap<>();
+
+        typeMap.put(PieceType.QUEEN, new MovesQueen());
+        typeMap.put(PieceType.KING, new MovesKing());
+        typeMap.put(PieceType.PAWN, new MovesPawn());
+        typeMap.put(PieceType.KNIGHT, new MovesKnight());
+        typeMap.put(PieceType.BISHOP, new MovesBishop());
+        typeMap.put(PieceType.ROOK, new MovesRook());
+
+        return typeMap.get(type);
+    }
+
+    private ChessPiece.PieceType[] promotionsArray(boolean promotes){
+        if (promotes){
+            return new ChessPiece.PieceType[] {PieceType.QUEEN, PieceType.KNIGHT, PieceType.ROOK, PieceType.BISHOP};
         } else {
-            Moves movesClass = getPieceMoves(myPiece.getPieceType());
-            Collection<ChessMove> moves = movesClass.pieceMoves(board, myPosition);
-            printMoves(board, myPosition, moves);
-            return moves;
+            return new ChessPiece.PieceType[] {null};
         }
     }
 
-    public String getPieceShortcut(ChessPiece piece){
-        HashMap<PieceType, String> shortcutMap = new HashMap<>();
-        shortcutMap.put(PieceType.KING, "K");
-        shortcutMap.put(PieceType.QUEEN, "Q");
-        shortcutMap.put(PieceType.ROOK, "R");
-        shortcutMap.put(PieceType.BISHOP, "B");
-        shortcutMap.put(PieceType.KNIGHT, "N");
-        shortcutMap.put(PieceType.PAWN, "P");
-        return shortcutMap.get(piece.pieceType);
-    }
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        /* STRUCTURE:
+        an array of arrays of directions to move, as well as a range of how many spaces they can move.
+        [
+        [to_row, to_col, range (if 0, unlimited)], promotes (0 or 1),
+        [to_row, to_col, range, promotes],
+        [to_row, to_col, range, promotes]
+        ]
+        */
 
-    public void printMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves){
-        for (int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
-                System.out.print("|");
-                ChessPosition currPosition = new ChessPosition(i, j);
-                ChessMove currMove = new ChessMove(myPosition, currPosition, null);
-                ChessPiece currPiece = board.getPiece(currPosition);
+        HashSet<ChessMove> moves = new HashSet<>();
 
-                if (currPiece == null) {
-                    if (moves.contains(currMove)) {
-                        System.out.print("#");
-                    } else {
-                        System.out.print(" ");
-                    }
+        ChessPiece myPiece = board.getPiece(myPosition);
+        ChessPiece.PieceType myType = myPiece.getPieceType();
+        Moves myMoves = typeMove(myType);
+        int[][] directions = myMoves.pieceMoves(board, myPosition);
+        int myY = myPosition.getRow();
+        int myX = myPosition.getColumn();
 
-                } else {
-                    if (currPiece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                        System.out.print(getPieceShortcut(currPiece));
-                    } else {
-                        System.out.print(getPieceShortcut(currPiece).toLowerCase());
+        // loop through each direction the piece can move, i.e. each inner array
+        eachDirection:
+        for(int[]direction : directions){
+            int yDir = direction[0];
+            int xDir = direction[1];
+            int range = direction[2] == 0 ? 10 : direction[2];
+            boolean promotes = direction[3] == 1;
+            ChessPiece.PieceType[] promos = promotionsArray(promotes);
+
+            // the position of our target space, will be incremented in our current direction in the next loop.
+            int targetY = myY + yDir;
+            int targetX = myX + xDir;
+            ChessPosition targetPos;
+            ChessPiece targetPiece;
+            ChessMove curMove;
+
+            // check spaces in that direction until we hit the piece's range
+            for(int i = 0; i < range; i++){
+                targetPos = new ChessPosition(targetY, targetX);
+                targetY += yDir;
+                targetX += xDir;
+
+                if (targetPos.posInBounds()){
+                    int promoCount = 1;
+                    // make a new move and decide if valid for each promotion (either null or Q, N, B, R)
+                    for(ChessPiece.PieceType promo : promos) {
+                        curMove = new ChessMove(myPosition, targetPos, promo);
+                        promoCount++;
+
+                        boolean[] isValid = board.isValidMove(curMove);
+                        boolean valid = isValid[0];
+                        boolean captured = isValid[1];
+
+                        if (valid){
+                            moves.add(curMove);
+                            if (captured){
+                                // this is statement and the promoCount counter prevent the loop from breaking on a capture until all promotions have been handled
+                                if (myPiece.getPieceType() == PieceType.PAWN && promoCount <= 4){
+                                    continue;
+                                }
+                                continue eachDirection;
+                            }
+                        } else {
+                            continue eachDirection;
+                        }
                     }
                 }
             }
-            System.out.print("|\n");
         }
+        printMoves(board, myPosition, moves);
+        return moves;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        System.out.print("\n\nCALLED ChessPiece.equals()\n\n");
-        if (obj instanceof ChessPiece) {
-            ChessPiece otherPiece = (ChessPiece) obj;
-            return this.teamColor == otherPiece.teamColor && this.pieceType == otherPiece.pieceType;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return teamColor == that.teamColor && pieceType == that.pieceType;
     }
 
     @Override
     public int hashCode() {
-        int colorCode = this.teamColor == ChessGame.TeamColor.WHITE ? 1 : 0;
-        int typeCode = this.pieceType.ordinal();
-        return colorCode + typeCode;
+        return Objects.hash(teamColor, pieceType);
     }
 }

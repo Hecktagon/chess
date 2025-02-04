@@ -9,13 +9,16 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPosition {
-    private int _row;
-    private int _col;
+    int y;
+    int x;
 
     public ChessPosition(int row, int col) {
-        this._row = row;
-        this._col = col;
-//        System.out.printf("\n\nRow: %s\nCol: %s", row, col);
+        y = row;
+        x = col;
+    }
+
+    public boolean posInBounds(){
+        return 1 <= x && x <= 8 && 1 <= y && y <= 8;
     }
 
     /**
@@ -23,7 +26,7 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
-        return this._row;
+        return y;
     }
 
     /**
@@ -31,20 +34,21 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-        return this._col;
+
+        return x;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof ChessPosition) {
-            ChessPosition otherPos = (ChessPosition) obj;
-            return this._row == otherPos._row && this._col == otherPos._col;
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
-        return false;
+        ChessPosition that = (ChessPosition) o;
+        return y == that.y && x == that.x;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_row, _col);
+        return Objects.hash(y, x);
     }
 }
