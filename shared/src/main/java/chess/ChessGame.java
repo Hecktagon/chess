@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -12,35 +13,11 @@ import java.util.HashSet;
 public class ChessGame {
     TeamColor turn;
     ChessBoard myBoard;
-    Collection<ChessMove> allBlackMoves;
-    Collection<ChessMove> allWhiteMoves;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
         myBoard = new ChessBoard();
         myBoard.resetBoard();
-        allBlackMoves = findAllMoves()[0];
-        allWhiteMoves = findAllMoves()[1];
-    }
-
-    HashSet<ChessMove>[] findAllMoves(){
-        HashSet<ChessMove> whiteMoves  = new HashSet<>();
-        HashSet<ChessMove> blackMoves  = new HashSet<>();
-
-        for(int i = 1; i <= 8; i++){
-            for(int j = 1; j <= 8; j++) {
-                ChessPosition curPos = new ChessPosition(i, j);
-                ChessPiece curPiece = myBoard.getPiece(curPos);
-                if (curPiece != null){
-                    if (curPiece.getTeamColor() == TeamColor.WHITE){
-                        whiteMoves.addAll(curPiece.pieceMoves(myBoard, curPos));
-                    } else {
-                        blackMoves.addAll(curPiece.pieceMoves(myBoard, curPos));
-                    }
-                }
-            }
-        }
-        return new HashSet[]{whiteMoves, blackMoves};
     }
 
     /**
@@ -141,6 +118,39 @@ public class ChessGame {
         }
     }
 
+
+    HashSet<ChessPosition> findTeamAttacks(TeamColor team) {
+        HashSet<ChessPosition> attacks = new HashSet<>();
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition curPos = new ChessPosition(i, j);
+                ChessPiece curPiece = myBoard.getPiece(curPos);
+                if (curPiece != null) {
+                    if (curPiece.getTeamColor() == team) {
+                        Collection<ChessMove> curMoves = curPiece.pieceMoves(myBoard, curPos);
+                        for (ChessMove move : curMoves){
+                            attacks.add(move.getEndPosition());
+                        }
+                    }
+                }
+            }
+        }
+        return attacks;
+    }
+
+    ChessPosition findKing(TeamColor team){
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition curPos = new ChessPosition(i, j);
+                ChessPiece curPiece = myBoard.getPiece(curPos);
+                if (curPiece != null && curPiece.getTeamColor() == team && curPiece.getPieceType() == ChessPiece.PieceType.KING){
+                    return curPos;
+                }
+            }
+        }
+        throw new NoSuchElementException("King does not exist!");
+    }
+
     /**
      * Determines if the given team is in check
      *
@@ -148,7 +158,10 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        return false;
+        TeamColor enemyColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        HashSet<ChessPosition> enemyAttacks = findTeamAttacks(enemyColor);
+        ChessPosition kingPos = findKing(teamColor);
+        return enemyAttacks.contains(kingPos);
     }
 
     /**
@@ -158,7 +171,9 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        TeamColor enemyColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        HashSet<ChessPosition> enemyAttacks = findTeamAttacks(enemyColor);
+        ChessPosition kingPos = findKing(teamColor);
     }
 
     /**
@@ -196,3 +211,4 @@ public class ChessGame {
         return myBoard;
     }
 }
+

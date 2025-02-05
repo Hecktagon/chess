@@ -164,7 +164,7 @@ public class ChessPiece {
                 }
             }
         }
-        printMoves(board, myPosition, moves);
+//        printMoves(board, myPosition, moves);
         return moves;
     }
 

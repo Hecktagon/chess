@@ -99,9 +99,7 @@ public class ChessBoard {
         } else {
             return new boolean[] {true, false};
         }
-
     }
-
 
     /**
      * Sets the board to the default starting board
