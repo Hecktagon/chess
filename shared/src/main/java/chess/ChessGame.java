@@ -114,7 +114,7 @@ public class ChessGame {
                 myBoard.printBoard();
                 flipTeamTurn();
             } else {
-
+                throw new InvalidMoveException("Invalid Move!");
             }
         } else {
             throw new InvalidMoveException("Invalid Move!");
