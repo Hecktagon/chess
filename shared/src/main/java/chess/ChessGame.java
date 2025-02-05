@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -13,11 +12,35 @@ import java.util.HashSet;
 public class ChessGame {
     TeamColor turn;
     ChessBoard myBoard;
+    Collection<ChessMove> allBlackMoves;
+    Collection<ChessMove> allWhiteMoves;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
         myBoard = new ChessBoard();
         myBoard.resetBoard();
+        allBlackMoves = findAllMoves()[0];
+        allWhiteMoves = findAllMoves()[1];
+    }
+
+    HashSet<ChessMove>[] findAllMoves(){
+        HashSet<ChessMove> whiteMoves  = new HashSet<>();
+        HashSet<ChessMove> blackMoves  = new HashSet<>();
+
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++) {
+                ChessPosition curPos = new ChessPosition(i, j);
+                ChessPiece curPiece = myBoard.getPiece(curPos);
+                if (curPiece != null){
+                    if (curPiece.getTeamColor() == TeamColor.WHITE){
+                        whiteMoves.addAll(curPiece.pieceMoves(myBoard, curPos));
+                    } else {
+                        blackMoves.addAll(curPiece.pieceMoves(myBoard, curPos));
+                    }
+                }
+            }
+        }
+        return new HashSet[]{whiteMoves, blackMoves};
     }
 
     /**
