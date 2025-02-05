@@ -36,6 +36,14 @@ public class ChessGame {
         turn = team;
     }
 
+    public void flipTeamTurn(){
+        if (turn == TeamColor.WHITE){
+            setTeamTurn(TeamColor.BLACK);
+        } else {
+            setTeamTurn(TeamColor.WHITE);
+        }
+    }
+
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
@@ -56,9 +64,29 @@ public class ChessGame {
         if (myPiece == null){
             return null;
         }
+
         Collection<ChessMove> allMoves = myPiece.pieceMoves(myBoard, startPosition);
 
-        return null;
+        allMoves.removeIf(this::endangersKing);
+
+        return allMoves;
+    }
+
+    public boolean endangersKing(ChessMove move){
+        ChessPosition start = move.getStartPosition();
+        ChessPiece myPiece = myBoard.getPiece(start);
+        ChessPosition end = move.getEndPosition();
+        ChessPiece endPiece = myBoard.getPiece(end);
+
+        myBoard.addPiece(start, null);
+        myBoard.addPiece(end, myPiece);
+
+        boolean causesCheck = isInCheck(myPiece.getTeamColor());
+
+        myBoard.addPiece(start, myPiece);
+        myBoard.addPiece(end, endPiece);
+
+        return causesCheck;
     }
 
     /**
@@ -68,7 +96,26 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        Collection<ChessMove> valids = validMoves(start);
+
+        if (valids != null && valids.contains(move) && start.posInBounds() && end.posInBounds()){
+            ChessPiece myPiece = myBoard.getPiece(start);
+            if(myPiece != null && myPiece.getTeamColor() == turn) {
+                myBoard.addPiece(start, null);
+                if (move.getPromotionPiece() == null){
+                    myBoard.addPiece(end, myPiece);
+                } else {
+                    myBoard.addPiece(end, new ChessPiece(myPiece.getTeamColor(), move.getPromotionPiece()));
+                }
+                System.out.printf("\n%s Moved:\n", myPiece);
+                myBoard.printBoard();
+                flipTeamTurn();
+            }
+        } else {
+            throw new InvalidMoveException("Invalid Move!");
+        }
     }
 
     /**
