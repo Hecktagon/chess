@@ -18,6 +18,7 @@ public class ChessGame {
         turn = TeamColor.WHITE;
         myBoard = new ChessBoard();
         myBoard.resetBoard();
+        setTeamTurn(TeamColor.WHITE);
     }
 
     /**
@@ -112,6 +113,8 @@ public class ChessGame {
                 System.out.printf("\n%s Moved:\n", myPiece);
                 myBoard.printBoard();
                 flipTeamTurn();
+            } else {
+
             }
         } else {
             throw new InvalidMoveException("Invalid Move!");
@@ -136,6 +139,19 @@ public class ChessGame {
             }
         }
         return attacks;
+    }
+
+    boolean teamCanMove(TeamColor team) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition curPos = new ChessPosition(i, j);
+                ChessPiece curPiece = myBoard.getPiece(curPos);
+                if (curPiece != null && curPiece.getTeamColor() == team && !validMoves(curPos).isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     ChessPosition findKing(TeamColor team){
@@ -174,6 +190,9 @@ public class ChessGame {
         TeamColor enemyColor = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
         HashSet<ChessPosition> enemyAttacks = findTeamAttacks(enemyColor);
         ChessPosition kingPos = findKing(teamColor);
+        boolean canMove = teamCanMove(teamColor);
+
+        return enemyAttacks.contains(kingPos) && !canMove;
     }
 
     /**
@@ -184,7 +203,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return !teamCanMove(teamColor) && !isInCheck(teamColor);
     }
 
     /**
