@@ -16,12 +16,22 @@ import java.util.Objects;
 public class ChessPiece {
     ChessGame.TeamColor teamColor;
     ChessPiece.PieceType pieceType;
-    boolean hasMoved;
+    boolean justMoved;
+    int numMoves;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         teamColor = pieceColor;
         pieceType = type;
-        hasMoved = false;
+        numMoves = 0;
+        justMoved = false;
+    }
+
+    public void setJustMoved(boolean just) {
+        this.justMoved = just;
+    }
+
+    public void moved(){
+        numMoves++;
     }
 
     public void printMoves(ChessBoard board, ChessPosition myPos, HashSet<ChessMove> moves){
@@ -96,6 +106,86 @@ public class ChessPiece {
         }
     }
 
+    public Collection<ChessMove> castle(ChessBoard board, ChessPosition pos){
+        HashSet<ChessMove> castles = new HashSet<>();
+        ChessPiece king = board.getPiece(pos);
+        ChessPiece negRook = board.getPiece(new ChessPosition(pos.getRow(),1));
+        ChessPiece posRook = board.getPiece(new ChessPosition(pos.getRow(),8));
+        ChessPiece blocking;
+        boolean blockedNeg = false;
+        boolean blockedPos = false;
+
+        // Check if neg path from king to rook is clear
+        for(int i = 2; i < 5; i++){
+            blocking = board.getPiece(new ChessPosition(pos.getRow(), i));
+            if (blocking != null){
+                blockedNeg = true;
+            }
+        }
+
+        // Check if pos path from king to rook is clear
+        for(int i = 6; i < 8; i++){
+            blocking = board.getPiece(new ChessPosition(pos.getRow(), i));
+            if (blocking != null){
+                blockedPos = true;
+            }
+        }
+
+        // Check if king & rook(s) are in position and haven't moved
+        if (king.numMoves == 0) {
+            if (king.teamColor == ChessGame.TeamColor.WHITE && pos.getRow() == 1 && pos.getColumn() == 5 ||
+                king.teamColor == ChessGame.TeamColor.BLACK && pos.getRow() == 8 && pos.getColumn() == 5) {
+                if (!blockedPos) {
+                    if (posRook != null && posRook.teamColor == king.teamColor && posRook.numMoves == 0) {
+                        ChessMove posCastle = new ChessMove(pos, new ChessPosition(pos.getRow(), pos.getColumn() + 2), null);
+                        posCastle.setCastle(true);
+                        castles.add(posCastle);
+                    }
+                }
+                if (!blockedNeg) {
+                    if (negRook != null && negRook.teamColor == king.teamColor && negRook.numMoves == 0) {
+                        ChessMove negCastle = new ChessMove(pos, new ChessPosition(pos.getRow(), pos.getColumn() - 3), null);
+                        negCastle.setCastle(true);
+                        castles.add(negCastle);
+                    }
+                }
+            }
+        }
+        return castles;
+    }
+
+    public ChessMove enPassant(ChessBoard board, ChessPosition pos){
+        ChessMove enPass;
+        ChessPosition posPosition = new ChessPosition(pos.getRow(), pos.getColumn() + 1);
+        ChessPosition negPosition = new ChessPosition(pos.getRow(), pos.getColumn() - 1);;
+        ChessPiece pawn = board.getPiece(pos);
+        int direction = pawn.teamColor == ChessGame.TeamColor.WHITE ? 1 : -1;
+
+        if(pawn.teamColor == ChessGame.TeamColor.WHITE && pos.getRow() == 5 ||
+            pawn.teamColor == ChessGame.TeamColor.BLACK && pos.getRow() == 4){
+            // pawn positive
+            if (posPosition.posInBounds()) {
+                ChessPiece posPiece = board.getPiece(posPosition);
+                if (posPiece != null && posPiece.pieceType == PieceType.PAWN
+                    && posPiece.teamColor != pawn.teamColor && posPiece.justMoved){
+                    enPass = new ChessMove(pos, new ChessPosition(pos.getRow() + direction, pos.getColumn() + 1), null);
+                    enPass.setEnPassant(true);
+                    return enPass;
+                }
+            }
+            if (negPosition.posInBounds()) {
+                ChessPiece negPiece = board.getPiece(negPosition);
+                if (negPiece != null && negPiece.pieceType == PieceType.PAWN
+                        && negPiece.teamColor != pawn.teamColor && negPiece.justMoved){
+                    enPass = new ChessMove(pos, new ChessPosition(pos.getRow() + direction, pos.getColumn() - 1), null);
+                    enPass.setEnPassant(true);
+                    return enPass;
+                }
+            }
+        }
+        return null;
+    }
+
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         /* STRUCTURE:
         an array of arrays of directions to move, as well as a range of how many spaces they can move.
@@ -162,6 +252,15 @@ public class ChessPiece {
                         }
                     }
                 }
+            }
+        }
+        if (pieceType == PieceType.KING){
+            moves.addAll(castle(board, myPosition));
+        }
+        if (pieceType == PieceType.PAWN){
+            ChessMove enPass = enPassant(board, myPosition);
+            if (enPass != null) {
+                moves.add(enPass);
             }
         }
 //        printMoves(board, myPosition, moves);

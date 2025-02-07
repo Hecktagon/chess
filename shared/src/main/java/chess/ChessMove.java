@@ -12,12 +12,32 @@ public class ChessMove {
     ChessPosition start;
     ChessPosition end;
     ChessPiece.PieceType promotion;
+    boolean castle;
+    boolean enPassant;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         start = startPosition;
         end = endPosition;
         promotion = promotionPiece;
+        castle = false;
+        enPassant = false;
+    }
+
+    public boolean isCastle() {
+        return castle;
+    }
+
+    public void setCastle(boolean y_n) {
+        castle = y_n;
+    }
+
+    public boolean isEnPassant() {
+        return enPassant;
+    }
+
+    public void setEnPassant(boolean y_n) {
+        enPassant = y_n;
     }
 
     /**

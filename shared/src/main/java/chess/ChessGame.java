@@ -13,12 +13,20 @@ import java.util.NoSuchElementException;
 public class ChessGame {
     TeamColor turn;
     ChessBoard myBoard;
+    int gameMoves;
+    ChessPiece mostRecent;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
         myBoard = new ChessBoard();
         myBoard.resetBoard();
         setTeamTurn(TeamColor.WHITE);
+        gameMoves = 0;
+        mostRecent = null;
+    }
+
+    public int getGameMoves() {
+        return gameMoves;
     }
 
     /**
@@ -112,6 +120,13 @@ public class ChessGame {
                 }
                 System.out.printf("\n%s Moved:\n", myPiece);
                 myBoard.printBoard();
+                myPiece.moved();
+                if (mostRecent != null) {
+                    mostRecent.setJustMoved(false);
+                }
+                myPiece.setJustMoved(true);
+                mostRecent = myPiece;
+                gameMoves++;
                 flipTeamTurn();
             } else {
                 throw new InvalidMoveException("Invalid Move!");
@@ -166,6 +181,7 @@ public class ChessGame {
         }
         throw new NoSuchElementException("King does not exist!");
     }
+
 
     /**
      * Determines if the given team is in check
