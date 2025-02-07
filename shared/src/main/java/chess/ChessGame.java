@@ -150,8 +150,6 @@ public class ChessGame {
         myBoard.addPiece(start, myPiece);
         myBoard.addPiece(end, endPiece);
 
-
-
         return causesCheck;
     }
 
@@ -204,7 +202,6 @@ public class ChessGame {
                     int direction = pawn.teamColor == ChessGame.TeamColor.WHITE ? 1 : -1;
 
                     ChessPosition enemyPos = new ChessPosition(pawnEnd.getRow() - direction, pawnEnd.getColumn());
-                    ChessPiece enemyPawn = myBoard.getPiece(enemyPos);
 
                     myBoard.addPiece(enemyPos, null);
                 }

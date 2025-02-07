@@ -39,7 +39,7 @@ public class ChessPiece {
         for(int i = 8; i > 0; i--){
             for(int j = 1; j <= 8; j++){
                 ChessPosition curPos = new ChessPosition(i, j);
-                ChessPiece curPiece = (ChessPiece) board.getPiece(curPos);
+                ChessPiece curPiece = board.getPiece(curPos);
                 System.out.print("|");
                 if (curPiece == null && moves.contains(new ChessMove(myPos, curPos, null))){
                     System.out.print("#");
@@ -157,7 +157,7 @@ public class ChessPiece {
     public ChessMove enPassant(ChessBoard board, ChessPosition pos){
         ChessMove enPass;
         ChessPosition posPosition = new ChessPosition(pos.getRow(), pos.getColumn() + 1);
-        ChessPosition negPosition = new ChessPosition(pos.getRow(), pos.getColumn() - 1);;
+        ChessPosition negPosition = new ChessPosition(pos.getRow(), pos.getColumn() - 1);
         ChessPiece pawn = board.getPiece(pos);
         int direction = pawn.teamColor == ChessGame.TeamColor.WHITE ? 1 : -1;
 
@@ -219,7 +219,6 @@ public class ChessPiece {
             int targetY = myY + yDir;
             int targetX = myX + xDir;
             ChessPosition targetPos;
-            ChessPiece targetPiece;
             ChessMove curMove;
 
             // check spaces in that direction until we hit the piece's range
@@ -242,7 +241,8 @@ public class ChessPiece {
                         if (valid){
                             moves.add(curMove);
                             if (captured){
-                                // this is statement and the promoCount counter prevent the loop from breaking on a capture until all promotions have been handled
+                                /* this if statement and the promoCount counter prevent the loop
+                                from breaking on a capture until all promotions have been handled */
                                 if (myPiece.getPieceType() == PieceType.PAWN && promoCount <= 4){
                                     continue;
                                 }
