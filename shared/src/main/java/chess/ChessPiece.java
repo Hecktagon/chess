@@ -173,6 +173,7 @@ public class ChessPiece {
                     return enPass;
                 }
             }
+            // pawn negative
             if (negPosition.posInBounds()) {
                 ChessPiece negPiece = board.getPiece(negPosition);
                 if (negPiece != null && negPiece.pieceType == PieceType.PAWN

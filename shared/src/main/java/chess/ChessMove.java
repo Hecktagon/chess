@@ -77,4 +77,15 @@ public class ChessMove {
     public int hashCode() {
         return Objects.hash(start, end, promotion);
     }
+
+    @Override
+    public String toString() {
+        return "ChessMove{" + "\n" +
+                "start= " + "row: " + start.getRow() + " col: " + start.getColumn() + "\n" +
+                ", end= " + "row: " + end.getRow() + " col: " + end.getColumn() + "\n" +
+                ", promotion=" + promotion + "\n" +
+                ", castle=" + castle + "\n" +
+                ", enPassant=" + enPassant + "\n" +
+                '}';
+    }
 }

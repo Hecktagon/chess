@@ -78,6 +78,50 @@ public class ChessGame {
 
         allMoves.removeIf(this::endangersKing);
 
+        for(ChessMove move : allMoves){
+            if(move.isCastle()){
+                ChessPosition kingStart = move.getStartPosition();
+                ChessPosition kingEnd = move.getEndPosition();
+
+                // test move rook
+                ChessPosition posRookStart = kingEnd.getColumn() > kingStart.getColumn() ?
+                        new ChessPosition(kingStart.getRow(), 8) : new ChessPosition(kingStart.getRow(), 1);
+                ChessPosition posRookEnd = kingEnd.getColumn() > kingStart.getColumn() ?
+                        new ChessPosition(kingStart.getRow(), 6) : new ChessPosition(kingStart.getRow(), 4);
+
+                ChessPiece posRook = myBoard.getPiece(posRookStart);
+                myBoard.addPiece(posRookStart, null);
+                myBoard.addPiece(posRookEnd, posRook);
+
+                if (endangersKing(move)){
+                    allMoves.remove(move);
+                } else {
+                    System.out.printf("\n added Castle:\n%s\n", move);
+                }
+
+                myBoard.addPiece(posRookStart, posRook);
+                myBoard.addPiece(posRookEnd, null);
+
+            } else if (move.isEnPassant()) {
+               ChessPosition pawnStart = move.getStartPosition();
+               ChessPiece pawn = myBoard.getPiece(pawnStart);
+               ChessPosition pawnEnd = move.getEndPosition();
+               int direction = pawn.teamColor == ChessGame.TeamColor.WHITE ? 1 : -1;
+
+               ChessPosition enemyPos = new ChessPosition(pawnEnd.getRow() - direction, pawnEnd.getColumn());
+               ChessPiece enemyPawn = myBoard.getPiece(enemyPos);
+
+               myBoard.addPiece(enemyPos, null);
+               if(endangersKing(move)){
+                   allMoves.remove(move);
+               } else {
+                   System.out.printf("\n added En Passant:\n%s\n", move);
+               }
+                myBoard.addPiece(enemyPos, enemyPawn);
+
+            }
+        }
+
         return allMoves;
     }
 
@@ -108,10 +152,48 @@ public class ChessGame {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         Collection<ChessMove> valids = validMoves(start);
+        for (ChessMove valid : valids){
+            if (valid.equals(move)){
+                move = valid;
+            }
+        }
+        System.out.print("\nDOING MOVE:\n");
+        System.out.print(move + "\n");
 
-        if (valids != null && valids.contains(move) && start.posInBounds() && end.posInBounds()){
+        if (!valids.isEmpty() && valids.contains(move) && start.posInBounds() && end.posInBounds()){
             ChessPiece myPiece = myBoard.getPiece(start);
             if(myPiece != null && myPiece.getTeamColor() == turn) {
+                // Castle
+                if(move.isCastle()){
+                    System.out.print("\nDOING CASTLE\n");
+                    ChessPosition kingStart = move.getStartPosition();
+                    ChessPosition kingEnd = move.getEndPosition();
+
+                    // test move rook
+                    ChessPosition posRookStart = kingEnd.getColumn() > kingStart.getColumn() ?
+                            new ChessPosition(kingStart.getRow(), 8) : new ChessPosition(kingStart.getRow(), 1);
+                    ChessPosition posRookEnd = kingEnd.getColumn() > kingStart.getColumn() ?
+                            new ChessPosition(kingStart.getRow(), 6) : new ChessPosition(kingStart.getRow(), 4);
+
+                    ChessPiece posRook = myBoard.getPiece(posRookStart);
+                    myBoard.addPiece(posRookStart, null);
+                    myBoard.addPiece(posRookEnd, posRook);
+                }
+
+                // En Passant
+                if(move.isEnPassant()){
+                    System.out.print("\nDOING EN PASSANT\n");
+                    ChessPosition pawnStart = move.getStartPosition();
+                    ChessPiece pawn = myBoard.getPiece(pawnStart);
+                    ChessPosition pawnEnd = move.getEndPosition();
+                    int direction = pawn.teamColor == ChessGame.TeamColor.WHITE ? 1 : -1;
+
+                    ChessPosition enemyPos = new ChessPosition(pawnEnd.getRow() - direction, pawnEnd.getColumn());
+                    ChessPiece enemyPawn = myBoard.getPiece(enemyPos);
+
+                    myBoard.addPiece(enemyPos, null);
+                }
+
                 myBoard.addPiece(start, null);
                 if (move.getPromotionPiece() == null){
                     myBoard.addPiece(end, myPiece);
@@ -128,9 +210,11 @@ public class ChessGame {
                 mostRecent = myPiece;
                 gameMoves++;
                 flipTeamTurn();
+
             } else {
                 throw new InvalidMoveException("Invalid Move!");
             }
+
         } else {
             throw new InvalidMoveException("Invalid Move!");
         }
@@ -235,6 +319,8 @@ public class ChessGame {
                 myBoard.addPiece(curPos, curPiece);
             }
         }
+        System.out.print("\nBoard Set\n");
+        board.printBoard();
     }
 
     /**
