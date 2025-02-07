@@ -144,7 +144,7 @@ public class ChessPiece {
                 }
                 if (!blockedNeg) {
                     if (negRook != null && negRook.teamColor == king.teamColor && negRook.numMoves == 0) {
-                        ChessMove negCastle = new ChessMove(pos, new ChessPosition(pos.getRow(), pos.getColumn() - 3), null);
+                        ChessMove negCastle = new ChessMove(pos, new ChessPosition(pos.getRow(), pos.getColumn() - 2), null);
                         negCastle.setCastle(true);
                         castles.add(negCastle);
                     }
@@ -279,5 +279,15 @@ public class ChessPiece {
     @Override
     public int hashCode() {
         return Objects.hash(teamColor, pieceType);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "teamColor=" + teamColor +
+                ", pieceType=" + pieceType +
+                ", justMoved=" + justMoved +
+                ", numMoves=" + numMoves +
+                '}';
     }
 }

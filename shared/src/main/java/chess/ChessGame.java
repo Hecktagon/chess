@@ -80,27 +80,13 @@ public class ChessGame {
 
         for(ChessMove move : allMoves){
             if(move.isCastle()){
-                ChessPosition kingStart = move.getStartPosition();
-                ChessPosition kingEnd = move.getEndPosition();
 
-                // test move rook
-                ChessPosition posRookStart = kingEnd.getColumn() > kingStart.getColumn() ?
-                        new ChessPosition(kingStart.getRow(), 8) : new ChessPosition(kingStart.getRow(), 1);
-                ChessPosition posRookEnd = kingEnd.getColumn() > kingStart.getColumn() ?
-                        new ChessPosition(kingStart.getRow(), 6) : new ChessPosition(kingStart.getRow(), 4);
-
-                ChessPiece posRook = myBoard.getPiece(posRookStart);
-                myBoard.addPiece(posRookStart, null);
-                myBoard.addPiece(posRookEnd, posRook);
 
                 if (endangersKing(move)){
                     allMoves.remove(move);
                 } else {
                     System.out.printf("\n added Castle:\n%s\n", move);
                 }
-
-                myBoard.addPiece(posRookStart, posRook);
-                myBoard.addPiece(posRookEnd, null);
 
             } else if (move.isEnPassant()) {
                ChessPosition pawnStart = move.getStartPosition();
@@ -130,14 +116,41 @@ public class ChessGame {
         ChessPiece myPiece = myBoard.getPiece(start);
         ChessPosition end = move.getEndPosition();
         ChessPiece endPiece = myBoard.getPiece(end);
+        boolean causesCheck;
 
         myBoard.addPiece(start, null);
         myBoard.addPiece(end, myPiece);
 
-        boolean causesCheck = isInCheck(myPiece.getTeamColor());
+        if(move.isCastle()) {
+            ChessPosition kingStart = move.getStartPosition();
+            ChessPosition kingEnd = move.getEndPosition();
+
+            // test move rook
+            ChessPosition posRookStart = kingEnd.getColumn() > kingStart.getColumn() ?
+                    new ChessPosition(kingStart.getRow(), 8) : new ChessPosition(kingStart.getRow(), 1);
+            ChessPosition posRookEnd = kingEnd.getColumn() > kingStart.getColumn() ?
+                    new ChessPosition(kingStart.getRow(), 6) : new ChessPosition(kingStart.getRow(), 4);
+
+            ChessPiece posRook = myBoard.getPiece(posRookStart);
+            myBoard.addPiece(posRookStart, null);
+            myBoard.addPiece(posRookEnd, posRook);
+
+            System.out.print("\ntesting Castle:\n");
+            myBoard.printBoard();
+
+            causesCheck = castleBlocked(move);
+            System.out.printf("\nARE WE IN CHECK? %s\n", causesCheck);
+
+            myBoard.addPiece(posRookStart, posRook);
+            myBoard.addPiece(posRookEnd, null);
+        } else {
+            causesCheck = isInCheck(myPiece.getTeamColor());
+        }
 
         myBoard.addPiece(start, myPiece);
         myBoard.addPiece(end, endPiece);
+
+
 
         return causesCheck;
     }
@@ -152,15 +165,17 @@ public class ChessGame {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         Collection<ChessMove> valids = validMoves(start);
-        for (ChessMove valid : valids){
-            if (valid.equals(move)){
-                move = valid;
+        if(valids != null) {
+            for (ChessMove valid : valids) {
+                if (valid.equals(move)) {
+                    move = valid;
+                }
             }
         }
-        System.out.print("\nDOING MOVE:\n");
-        System.out.print(move + "\n");
+//        System.out.print("\nDOING MOVE:\n");
+//        System.out.print(move + "\n");
 
-        if (!valids.isEmpty() && valids.contains(move) && start.posInBounds() && end.posInBounds()){
+        if (valids != null && valids.contains(move) && start.posInBounds() && end.posInBounds()){
             ChessPiece myPiece = myBoard.getPiece(start);
             if(myPiece != null && myPiece.getTeamColor() == turn) {
                 // Castle
@@ -266,6 +281,26 @@ public class ChessGame {
         throw new NoSuchElementException("King does not exist!");
     }
 
+    public boolean castleBlocked(ChessMove move){
+        ChessPosition kingStart = move.getStartPosition();
+        ChessPosition kingEnd = move.getEndPosition();
+        boolean castleDirectionPos = kingEnd.getColumn() > kingStart.getColumn();
+
+        ChessPiece king = myBoard.getPiece(kingEnd);
+        TeamColor team = king.getTeamColor();
+        TeamColor enemyColor = team == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        HashSet<ChessPosition> enemyAttacks = findTeamAttacks(enemyColor);
+        if (castleDirectionPos){
+            return enemyAttacks.contains(kingStart)
+                    || enemyAttacks.contains(new ChessPosition(kingStart.getRow(), kingStart.getColumn() + 1))
+                    || enemyAttacks.contains(kingEnd);
+        } else {
+            return enemyAttacks.contains(kingStart)
+                    || enemyAttacks.contains(new ChessPosition(kingStart.getRow(), kingStart.getColumn() - 1))
+                    || enemyAttacks.contains(new ChessPosition(kingStart.getRow(), kingStart.getColumn() - 2))
+                    || enemyAttacks.contains(kingEnd);
+        }
+    }
 
     /**
      * Determines if the given team is in check
