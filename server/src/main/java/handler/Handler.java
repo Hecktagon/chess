@@ -1,6 +1,13 @@
 package handler;
+import spark.*;
 
 public class Handler {
+
+    private Object handleClearAll(Request req, Response res) throws ResponseException {
+        service.deleteAllPets();
+        res.status(204);
+        return "";
+    }
 }
 
 
