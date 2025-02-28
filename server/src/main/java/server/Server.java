@@ -18,10 +18,6 @@ public class Server {
         return Spark.port();
     }
 
-    public int port() {
-        return Spark.port();
-    }
-
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
