@@ -18,7 +18,7 @@ public class Server {
 //        Spark.get("/game", handleListGames);
 //        Spark.post("/game", handleCreateGame);
 //        Spark.put("/game", handleJoinGame);
-//        Spark.exception(ResponseException.class, this::exceptionHandler);
+//        Spark.exception(ResponseException.class, handleException);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
