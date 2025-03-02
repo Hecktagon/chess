@@ -1,7 +1,12 @@
 package server;
-import handler.*;
+import model.UserData;
 import spark.*;
-//import exception.ResponseException;
+import com.google.gson.Gson;
+import exception.ResponseException;
+import model.UserData;
+import service.Service;
+
+
 
 public class Server {
 
@@ -11,14 +16,14 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-//        Spark.delete("/db", handleClearAll);
-//        Spark.post("/user", handleRegister);
-//        Spark.post("/session", handleLogin);
-//        Spark.delete("/session", handleLogout);
-//        Spark.get("/game", handleListGames);
-//        Spark.post("/game", handleCreateGame);
-//        Spark.put("/game", handleJoinGame);
-//        Spark.exception(ResponseException.class, handleException);
+        Spark.delete("/db", this::handleClearAll);
+        Spark.post("/user", this::handleRegister);
+//        Spark.post("/session", this::handleLogin);
+//        Spark.delete("/session", this::handleLogout);
+//        Spark.get("/game", this::handleListGames);
+//        Spark.post("/game", this::handleCreateGame);
+//        Spark.put("/game", this::handleJoinGame);
+//        Spark.exception(ResponseException.class, this::handleException);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
@@ -32,7 +37,60 @@ public class Server {
         Spark.awaitStop();
     }
 
-//    private Object
+    // HANDLERS:
+
+    private Object handleClearAll(Request req, Response res) throws ResponseException {
+        service.clearALl;
+        res.status(200);
+        return "";
+    }
+
+    private Object handleRegister(Request req, Response res) throws ResponseException {
+        var user = new Gson().fromJson(req.body(), UserData.class);
+        user = service.register(user);
+        return new Gson().toJson(user);
+    }
+
+//    private Object handleLogin(Request req, Response res) throws ResponseException {
+//        var pet = new Gson().fromJson(req.body(), Pet.class);
+//        pet = service.addPet(pet);
+//        return new Gson().toJson(pet);
+//    }
+//
+//    private Object handleLogout(Request req, Response res) throws ResponseException {
+//        var id = Integer.parseInt(req.params(":id"));
+//        var pet = service.getPet(id);
+//        if (pet != null) {
+//            service.deletePet(id);
+//            res.status(204);
+//        } else {
+//            res.status(404);
+//        }
+//        return "";
+//    }
+//
+//    private Object handleListGames(Request req, Response res) throws ResponseException {
+//        res.type("application/json");
+//        var list = service.listPets().toArray();
+//        return new Gson().toJson(Map.of("pet", list));
+//    }
+//
+//    private Object handleCreateGame(Request req, Response res) throws ResponseException {
+//        var pet = new Gson().fromJson(req.body(), Pet.class);
+//        pet = service.addPet(pet);
+//        return new Gson().toJson(pet);
+//    }
+//
+//    private Object handleJoinGame(Request req, Response res) throws ResponseException {
+//        var pet = new Gson().fromJson(req.body(), Pet.class);
+//        pet = service.addPet(pet);
+//        return new Gson().toJson(pet);
+//    }
+//
+//    private void handleException(ResponseException ex, Request req, Response res) {
+//        res.status(ex.StatusCode());
+//        res.body(ex.toJson());
+//    }
 }
 
 
