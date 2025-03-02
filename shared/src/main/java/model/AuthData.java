@@ -1,4 +1,8 @@
 package model;
+import com.google.gson.Gson;
 
-public class AuthData {
+public record AuthData (String authToken) {
+    public String toString() {
+        return new Gson().toJson(this);
+    }
 }

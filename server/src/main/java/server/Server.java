@@ -4,20 +4,22 @@ import spark.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.UserData;
-import service.Service;
+import service.ClearService;
 
 
 
 public class Server {
+    ClearService clearService;
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
+
 
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::handleClearAll);
-        Spark.post("/user", this::handleRegister);
+//        Spark.post("/user", this::handleRegister);
 //        Spark.post("/session", this::handleLogin);
 //        Spark.delete("/session", this::handleLogout);
 //        Spark.get("/game", this::handleListGames);
@@ -40,16 +42,16 @@ public class Server {
     // HANDLERS:
 
     private Object handleClearAll(Request req, Response res) throws ResponseException {
-        service.clearALl;
+        clearService.clearAll();
         res.status(200);
         return "";
     }
 
-    private Object handleRegister(Request req, Response res) throws ResponseException {
-        var user = new Gson().fromJson(req.body(), UserData.class);
-        user = service.register(user);
-        return new Gson().toJson(user);
-    }
+//    private Object handleRegister(Request req, Response res) throws ResponseException {
+//        var user = new Gson().fromJson(req.body(), UserData.class);
+//        user = service.register(user);
+//        return new Gson().toJson(user);
+//    }
 
 //    private Object handleLogin(Request req, Response res) throws ResponseException {
 //        var pet = new Gson().fromJson(req.body(), Pet.class);
