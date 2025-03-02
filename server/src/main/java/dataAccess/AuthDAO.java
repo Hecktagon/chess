@@ -11,8 +11,6 @@ public interface AuthDAO {
 
     Collection<AuthData> readAuths() throws DataAccessException;
 
-    AuthData updateAuth(AuthData auth) throws DataAccessException;
-
     void deleteAuth(AuthData auth) throws DataAccessException;
 
     void clearAuths() throws DataAccessException;

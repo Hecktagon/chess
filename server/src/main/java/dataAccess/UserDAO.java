@@ -11,8 +11,6 @@ public interface UserDAO {
 
     Collection<UserData> readUsers() throws DataAccessException;
 
-    UserData updateUser(UserData user) throws DataAccessException;
-
     void deleteUser(UserData user) throws DataAccessException;
 
     void clearUsers() throws DataAccessException;
