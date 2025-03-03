@@ -1,4 +1,5 @@
 package server;
+import dataAccess.*;
 import model.UserData;
 import spark.*;
 import com.google.gson.Gson;
@@ -14,18 +15,21 @@ public class Server {
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
+        AuthDAO authDAO = new MemoryAuth();
+        UserDAO userDAO = new MemoryUser();
+        GameDAO gameDAO = new MemoryGame();
 
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::handleClearAll);
-//        Spark.post("/user", this::handleRegister);
+        Spark.post("/user", this::handleRegister);
 //        Spark.post("/session", this::handleLogin);
 //        Spark.delete("/session", this::handleLogout);
 //        Spark.get("/game", this::handleListGames);
 //        Spark.post("/game", this::handleCreateGame);
 //        Spark.put("/game", this::handleJoinGame);
-//        Spark.exception(ResponseException.class, this::handleException);
+        Spark.exception(ResponseException.class, this::handleException);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
@@ -47,11 +51,13 @@ public class Server {
         return "";
     }
 
-//    private Object handleRegister(Request req, Response res) throws ResponseException {
-//        var user = new Gson().fromJson(req.body(), UserData.class);
-//        user = service.register(user);
-//        return new Gson().toJson(user);
-//    }
+
+    // the auth token is in the headers under "Authorization"
+    private Object handleRegister(Request req, Response res) throws ResponseException {
+        var user = new Gson().fromJson(req.body(), UserData.class);
+        user = service.register(user);
+        return new Gson().toJson(user);
+    }
 
 //    private Object handleLogin(Request req, Response res) throws ResponseException {
 //        var pet = new Gson().fromJson(req.body(), Pet.class);
@@ -89,10 +95,10 @@ public class Server {
 //        return new Gson().toJson(pet);
 //    }
 //
-//    private void handleException(ResponseException ex, Request req, Response res) {
-//        res.status(ex.StatusCode());
-//        res.body(ex.toJson());
-//    }
+    private void handleException(ResponseException ex, Request req, Response res) {
+        res.status(ex.StatusCode());
+        res.body(ex.toJson());
+    }
 }
 
 

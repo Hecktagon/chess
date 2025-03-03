@@ -1,7 +1,7 @@
 package dataAccess;
 
 import model.GameData;
-
+import exception.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,26 +10,26 @@ public class MemoryGame implements GameDAO{
 
     private final HashMap<Integer, GameData> games = new HashMap<>();
 
-    public GameData createGame(String gameName) throws DataAccessException{
+    public GameData createGame(String gameName) throws ResponseException{
         int gameID = 100000 + games.size();
         GameData game = new GameData(null, null, gameID, gameName);
         games.put(gameID, game);
         return game;
     }
 
-    public GameData getGame(Integer gameID) throws DataAccessException{
+    public GameData getGame(Integer gameID) throws ResponseException{
         if (games.containsKey(gameID)){
             return games.get(gameID);
         }
-        throw new DataAccessException("No such game.");
+        throw new ResponseException(400, "No such game.");
     }
 
-    public Collection<GameData> readGames() throws DataAccessException{
+    public Collection<GameData> readGames() throws ResponseException{
         return games.values();
     }
 
     // Might need to edit to account for the wrong color being entered.
-    public GameData updateGame(String userName, String playerColor, GameData unupdatedGame) throws DataAccessException{
+    public GameData updateGame(String userName, String playerColor, GameData unupdatedGame) throws ResponseException{
         games.remove(unupdatedGame);
         GameData updatedGame;
         if(playerColor == "BLACK") {
@@ -41,14 +41,14 @@ public class MemoryGame implements GameDAO{
             return updatedGame;
         }
         String err = playerColor + " is an invalid player color.";
-        throw new DataAccessException(err);
+        throw new ResponseException(400, err);
     }
 
-    public void deleteGame(Integer gameID) throws DataAccessException{
+    public void deleteGame(Integer gameID) throws ResponseException{
         games.remove(gameID);
     }
 
-    public void clearGames() throws DataAccessException{
+    public void clearGames() throws ResponseException{
         games.clear();
     }
 }
