@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Vector;
 
 public class MemoryUser implements UserDAO{
-    private HashMap<String, UserData> users = new HashMap<>();
+    private final HashMap<String, UserData> users = new HashMap<>();
 
     public UserData createUser(UserData user) throws DataAccessException{
         users.put(user.userName(),user);

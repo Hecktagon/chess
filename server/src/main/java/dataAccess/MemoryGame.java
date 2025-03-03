@@ -8,7 +8,7 @@ import java.util.HashSet;
 
 public class MemoryGame implements GameDAO{
 
-    private HashMap<Integer, GameData> games = new HashMap<>();
+    private final HashMap<Integer, GameData> games = new HashMap<>();
 
     public GameData createGame(String gameName) throws DataAccessException{
         int gameID = 100000 + games.size();

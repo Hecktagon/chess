@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class MemoryAuth implements AuthDAO{
-    private HashSet<AuthData> auths = new HashSet<>();
+    private final HashSet<AuthData> auths = new HashSet<>();
 
     public AuthData createAuth(AuthData auth) throws DataAccessException{
         auths.add(auth);

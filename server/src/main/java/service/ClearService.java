@@ -1,10 +1,10 @@
 package service;
 import exception.ResponseException;
-import dataAccess.AuthDAO;
+import dataAccess.*;
 
 public class ClearService {
 
     public void clearAll() throws ResponseException {
-        AuthDAO authDAO;
+
     }
 }
