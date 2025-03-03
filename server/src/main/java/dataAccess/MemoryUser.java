@@ -12,13 +12,13 @@ public class MemoryUser implements UserDAO{
     private final HashMap<String, UserData> users = new HashMap<>();
 
     public UserData createUser(UserData user) throws ResponseException{
-        users.put(user.userName(),user);
+        users.put(user.username(),user);
         return user;
     }
 
-    public UserData getUser(String userName) throws ResponseException{
-        if (users.containsKey(userName)){
-            return users.get(userName);
+    public UserData getUser(String username) throws ResponseException{
+        if (users.containsKey(username)){
+            return users.get(username);
         }
         return null;
     }
@@ -27,8 +27,8 @@ public class MemoryUser implements UserDAO{
         return users.values();
     }
 
-    public void deleteUser(String userName) throws ResponseException{
-        users.remove(userName);
+    public void deleteUser(String username) throws ResponseException{
+        users.remove(username);
     }
 
     public void clearUsers() throws ResponseException{

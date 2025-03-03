@@ -1,16 +1,21 @@
 package server;
 import dataAccess.*;
 import model.UserData;
+import service.GameService;
+import service.UserService;
 import spark.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.UserData;
 import service.ClearService;
+import resReq.*;
 
 
 
 public class Server {
     ClearService clearService;
+    UserService userService;
+    GameService gameService;
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -18,6 +23,10 @@ public class Server {
         AuthDAO authDAO = new MemoryAuth();
         UserDAO userDAO = new MemoryUser();
         GameDAO gameDAO = new MemoryGame();
+
+        clearService = new ClearService(authDAO, gameDAO, userDAO);
+        userService = new UserService(authDAO, userDAO);
+//        gameService = new GameService(authDAO, gameDAO);
 
         Spark.staticFiles.location("web");
 
@@ -54,9 +63,11 @@ public class Server {
 
     // the auth token is in the headers under "Authorization"
     private Object handleRegister(Request req, Response res) throws ResponseException {
-        var user = new Gson().fromJson(req.body(), UserData.class);
-        user = service.register(user);
-        return new Gson().toJson(user);
+        RegisterRequest user = new Gson().fromJson(req.body(), RegisterRequest.class);
+
+        RegisterResponse registerResponse = userService.register(user);
+        res.status(200);
+        return new Gson().toJson(registerResponse);
     }
 
 //    private Object handleLogin(Request req, Response res) throws ResponseException {
