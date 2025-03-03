@@ -1,5 +1,6 @@
 package dataAccess;
 
+import chess.ChessGame;
 import model.GameData;
 import exception.*;
 import java.util.Collection;
@@ -12,7 +13,7 @@ public class MemoryGame implements GameDAO{
 
     public GameData createGame(String gameName) throws ResponseException{
         int gameID = 100000 + games.size();
-        GameData game = new GameData(null, null, gameID, gameName);
+        GameData game = new GameData(null, null, gameID, gameName, new ChessGame());
         games.put(gameID, game);
         return game;
     }
@@ -30,14 +31,16 @@ public class MemoryGame implements GameDAO{
 
     // Might need to edit to account for the wrong color being entered.
     public GameData updateGame(String userName, String playerColor, GameData unupdatedGame) throws ResponseException{
-        games.remove(unupdatedGame);
+        games.remove(unupdatedGame.gameID());
         GameData updatedGame;
         if(playerColor == "BLACK") {
-            updatedGame = new GameData(unupdatedGame.whiteUserName(), userName, unupdatedGame.gameID(), unupdatedGame.gameName());
+            updatedGame = new GameData(unupdatedGame.whiteUserName(), userName, unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
+            games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
         }
         if (playerColor == "WHITE") {
-            updatedGame = new GameData(userName, unupdatedGame.blackUserName(), unupdatedGame.gameID(), unupdatedGame.gameName());
+            updatedGame = new GameData(userName, unupdatedGame.blackUserName(), unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
+            games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
         }
         String err = playerColor + " is an invalid player color.";

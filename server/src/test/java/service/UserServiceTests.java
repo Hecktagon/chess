@@ -37,4 +37,28 @@ public class UserServiceTests {
 
         System.out.print("\nPASSED :)\n\n");
     }
+
+    @Test
+    @DisplayName("Register Response Fail: bad request")
+    public void regResFail400() throws ResponseException {
+        ResponseException exception  = Assertions.assertThrows(ResponseException.class, () ->
+        userService.register(new RegisterRequest(null, null, null))
+    );
+        Assertions.assertEquals(400, exception.StatusCode());
+    }
+
+    @Test
+    @DisplayName("Register Response Fail: already taken")
+    public void regResFail403() throws ResponseException {
+        String username = "Bob";
+        String password = "boB";
+        String email = "bob@hotmail.com";
+
+        userService.register(new RegisterRequest(username, password, email));
+
+        ResponseException exception  = Assertions.assertThrows(ResponseException.class, () ->
+                userService.register(new RegisterRequest(username, password, email))
+        );
+        Assertions.assertEquals(403, exception.StatusCode());
+    }
 }

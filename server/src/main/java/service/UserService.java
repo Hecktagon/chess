@@ -26,6 +26,10 @@ public class UserService {
         if (userCheck == null){
             UserData userData = new UserData(userReq.username(), userReq.password(), userReq.email());
             userData = userDAO.createUser(userData);
+            if (userData.username() == null || userData.password() == null || userData.email() == null ||
+            userData.username().isEmpty() || userData.password().isEmpty() || userData.email().isEmpty()){
+                throw new ResponseException(400, "Error: bad request");
+            }
 
             UUID uuid = UUID.randomUUID();
             AuthData authData = authDAO.createAuth(new AuthData(uuid.toString(), userData.username()));
