@@ -31,22 +31,26 @@ public class MemoryGame implements GameDAO{
         return gameList;
     }
 
-    // Might need to edit to account for the wrong color being entered.
-    public GameData updateGame(String userName, String playerColor, GameData unupdatedGame) throws ResponseException{
-        games.remove(unupdatedGame.gameID());
+    public GameData updateGame(String userName, String playerColor, Integer gameID) throws ResponseException{
+        GameData unupdatedGame = games.get(gameID);
         GameData updatedGame;
-        if(playerColor == "BLACK") {
+        if(playerColor == "BLACK" && unupdatedGame.blackUserName() == null) {
             updatedGame = new GameData(unupdatedGame.whiteUserName(), userName, unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
+            games.remove(gameID);
             games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
         }
-        if (playerColor == "WHITE") {
+        if (playerColor == "WHITE" && unupdatedGame.whiteUserName() == null) {
             updatedGame = new GameData(userName, unupdatedGame.blackUserName(), unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
+            games.remove(gameID);
             games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
         }
-        String err = playerColor + " is an invalid player color.";
-        throw new ResponseException(400, err);
+        if (playerColor != "WHITE" && playerColor != "BLACK") {
+
+            throw new ResponseException(400, "Error: bad request");
+        }
+        throw new ResponseException(403, "Error: already taken");
     }
 
     public void deleteGame(Integer gameID) throws ResponseException{

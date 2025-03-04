@@ -11,7 +11,7 @@ public interface GameDAO {
 
     Collection<GameData> readGames() throws ResponseException;
 
-    GameData updateGame(String userName, String playerColor, GameData unupdatedGame) throws ResponseException;
+    GameData updateGame(String userName, String playerColor, Integer gameID) throws ResponseException;
 
     void deleteGame(Integer gameID) throws ResponseException;
 

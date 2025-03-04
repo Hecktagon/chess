@@ -6,9 +6,6 @@ public class ClearService {
     AuthDAO authDAO;
     GameDAO gameDAO;
     UserDAO userDAO;
-//    ClearService(AuthDAO auth, GameDAO game, UserDAO user){
-//
-//    }
 
     public ClearService(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO) {
         this.authDAO = authDAO;

@@ -5,10 +5,7 @@ import dataAccess.GameDAO;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
-import resReq.CreateGameRequest;
-import resReq.CreateGameResponse;
-import resReq.ListGamesRequest;
-import resReq.ListGamesResponse;
+import resReq.*;
 
 import java.util.Vector;
 
@@ -40,5 +37,15 @@ public class GameService {
         }
         GameData createdGame = gameDAO.createGame(createGameRequest.gameName());
         return new CreateGameResponse(createdGame.gameID());
+    }
+
+    public EmptyResponse joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
+        AuthData auth = authDAO.getAuth(joinGameRequest.authToken());
+        if (auth == null) {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
+
+        GameData joinedGame = gameDAO.updateGame(auth.username(), joinGameRequest.playerColor(), joinGameRequest.gameID());
+        return new EmptyResponse();
     }
 }
