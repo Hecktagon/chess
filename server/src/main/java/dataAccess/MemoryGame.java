@@ -3,10 +3,8 @@ package dataAccess;
 import chess.ChessGame;
 import model.GameData;
 import exception.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Vector;
+
+import java.util.*;
 
 public class MemoryGame implements GameDAO{
 
@@ -32,21 +30,25 @@ public class MemoryGame implements GameDAO{
     }
 
     public GameData updateGame(String userName, String playerColor, Integer gameID) throws ResponseException{
+        System.out.print(playerColor);
         GameData unupdatedGame = games.get(gameID);
+        if(unupdatedGame == null){
+
+        }
         GameData updatedGame;
-        if(playerColor == "BLACK" && unupdatedGame.blackUserName() == null) {
+        if(Objects.equals(playerColor, "BLACK") && unupdatedGame.blackUserName() == null) {
             updatedGame = new GameData(unupdatedGame.whiteUserName(), userName, unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
             games.remove(gameID);
             games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
         }
-        if (playerColor == "WHITE" && unupdatedGame.whiteUserName() == null) {
+        if (Objects.equals(playerColor, "WHITE") && unupdatedGame.whiteUserName() == null) {
             updatedGame = new GameData(userName, unupdatedGame.blackUserName(), unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
             games.remove(gameID);
             games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
         }
-        if (playerColor != "WHITE" && playerColor != "BLACK") {
+        if (!Objects.equals(playerColor, "WHITE") && !Objects.equals(playerColor, "BLACK")) {
 
             throw new ResponseException(400, "Error: bad request");
         }
