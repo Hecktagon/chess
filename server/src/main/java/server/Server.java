@@ -33,15 +33,12 @@ public class Server {
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::handleClearAll);
         Spark.post("/user", this::handleRegister);
-//        Spark.post("/session", this::handleLogin);
+        Spark.post("/session", this::handleLogin);
 //        Spark.delete("/session", this::handleLogout);
 //        Spark.get("/game", this::handleListGames);
 //        Spark.post("/game", this::handleCreateGame);
 //        Spark.put("/game", this::handleJoinGame);
         Spark.exception(ResponseException.class, this::handleException);
-
-        //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -70,11 +67,12 @@ public class Server {
         return new Gson().toJson(registerResponse);
     }
 
-//    private Object handleLogin(Request req, Response res) throws ResponseException {
-//        var pet = new Gson().fromJson(req.body(), Pet.class);
-//        pet = service.addPet(pet);
-//        return new Gson().toJson(pet);
-//    }
+    private Object handleLogin(Request req, Response res) throws ResponseException {
+        LoginRequest loginReq = new Gson().fromJson(req.body(), LoginRequest.class);
+        LoginResponse loginRes = userService.login(loginReq);
+        res.status(200);
+        return new Gson().toJson(loginRes);
+    }
 //
 //    private Object handleLogout(Request req, Response res) throws ResponseException {
 //        var id = Integer.parseInt(req.params(":id"));

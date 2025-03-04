@@ -5,8 +5,12 @@ import dataAccess.UserDAO;
 import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
+import resReq.LoginRequest;
+import resReq.LoginResponse;
 import resReq.RegisterRequest;
 import resReq.RegisterResponse;
+
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -38,5 +42,19 @@ public class UserService {
         else {
             throw new ResponseException(403, "Error: already taken");
         }
+    }
+
+    public LoginResponse login(LoginRequest loginRequest) throws ResponseException {
+         UserData userData = userDAO.getUser(loginRequest.username());
+         if(userData != null){
+             if (!Objects.equals(userData.password(), loginRequest.password())){
+                 throw new ResponseException(401, "Error: unauthorized");
+             }
+             String uuid = UUID.randomUUID().toString();
+             authDAO.createAuth(new AuthData(uuid, loginRequest.username()));
+             return new LoginResponse(loginRequest.username(), uuid);
+         }
+         throw new ResponseException(401, "Error: no such user" );
+
     }
 }

@@ -4,6 +4,8 @@ import dataAccess.MemoryAuth;
 import dataAccess.MemoryGame;
 import dataAccess.MemoryUser;
 import exception.ResponseException;
+import resReq.LoginRequest;
+import resReq.LoginResponse;
 import resReq.RegisterRequest;
 import resReq.RegisterResponse;
 import service.UserService;
@@ -25,7 +27,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Register Response Success")
-    public void regResPass() throws ResponseException {
+    public void registerPass() throws ResponseException {
         System.out.print("TESTING: Register Response Success\n\n");
         String username = "Bob";
         String password = "boB";
@@ -40,7 +42,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Register Response Fail: bad request")
-    public void regResFail400() throws ResponseException {
+    public void registerFail400() throws ResponseException {
         ResponseException exception  = Assertions.assertThrows(ResponseException.class, () ->
         userService.register(new RegisterRequest(null, null, null))
     );
@@ -49,7 +51,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Register Response Fail: already taken")
-    public void regResFail403() throws ResponseException {
+    public void registerFail403() throws ResponseException {
         String username = "Bob";
         String password = "boB";
         String email = "bob@hotmail.com";
@@ -61,4 +63,52 @@ public class UserServiceTests {
         );
         Assertions.assertEquals(403, exception.StatusCode());
     }
+
+    @Test
+    @DisplayName("Login Success")
+    public void loginPass() throws ResponseException {
+        System.out.print("TESTING: Login Success\n\n");
+        String username = "Bob";
+        String password = "boB";
+        String email = "bob@hotmail.com";
+
+        userService.register(new RegisterRequest(username, password, email));
+        LoginResponse actual = userService.login(new LoginRequest(username, password));
+        System.out.print("Response:\n");
+        System.out.print(actual + "\n");
+        Assertions.assertNotNull(actual);
+
+        System.out.print("\nPASSED :)\n\n");
+    }
+
+    @Test
+    @DisplayName("Login Fail: No Such User")
+    public void loginFail401() throws ResponseException {
+        String username = "Bob";
+        String password = "boB";
+
+        ResponseException exception  = Assertions.assertThrows(ResponseException.class, () ->
+        userService.login(new LoginRequest(username, password))
+        );
+
+        Assertions.assertEquals(401, exception.StatusCode());
+    }
+
+    @Test
+    @DisplayName("Logout Success")
+    public void logoutPass() throws ResponseException {
+        System.out.print("TESTING: Logout Success\n\n");
+        String username = "Bob";
+        String password = "boB";
+        String email = "bob@hotmail.com";
+
+        userService.register(new RegisterRequest(username, password, email));
+        LoginResponse loginRes = userService.login(new LoginRequest(username, password));
+        LogoutResult actual = userService.logout(new LogoutRequest(loginRes.authToken()));
+        Assertions.assertNotEquals(actual, loginRes);
+
+
+        System.out.print("\nPASSED :)\n\n");
+    }
+
 }
