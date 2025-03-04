@@ -10,6 +10,7 @@ import model.UserData;
 import service.ClearService;
 import resReq.*;
 
+import java.util.Map;
 
 
 public class Server {
@@ -83,8 +84,8 @@ public class Server {
 
     private Object handleListGames(Request req, Response res) throws ResponseException {
         String authToken = req.headers("Authorization");
-        var list = gameService.listGames().toArray();
-        return new Gson().toJson(Map.of("pet", list));
+        ListGamesResponse gameList = gameService.listGames(new ListGamesRequest(authToken));
+        return new Gson().toJson(Map.of("games", gameList.games()));
     }
 //
 //    private Object handleCreateGame(Request req, Response res) throws ResponseException {

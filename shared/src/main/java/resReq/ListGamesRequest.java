@@ -1,4 +1,4 @@
 package resReq;
 
-public record ListGamesRequest() {
+public record ListGamesRequest(String authToken) {
 }

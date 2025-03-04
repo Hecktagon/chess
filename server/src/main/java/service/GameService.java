@@ -2,6 +2,9 @@ package service;
 
 import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
+import resReq.ListGamesRequest;
+import resReq.ListGamesResponse;
+
 
 public class GameService {
     AuthDAO authDAO;
