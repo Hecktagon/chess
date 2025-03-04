@@ -363,5 +363,10 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return myBoard;
     }
+
+    @Override
+    public String toString() {
+        return "ChessGame{}";
+    }
 }
 

@@ -37,7 +37,7 @@ public class Server {
         Spark.post("/session", this::handleLogin);
         Spark.delete("/session", this::handleLogout);
         Spark.get("/game", this::handleListGames);
-//        Spark.post("/game", this::handleCreateGame);
+        Spark.post("/game", this::handleCreateGame);
 //        Spark.put("/game", this::handleJoinGame);
         Spark.exception(ResponseException.class, this::handleException);
 
@@ -87,12 +87,14 @@ public class Server {
         ListGamesResponse gameList = gameService.listGames(new ListGamesRequest(authToken));
         return new Gson().toJson(Map.of("games", gameList.games()));
     }
-//
-//    private Object handleCreateGame(Request req, Response res) throws ResponseException {
-//        var pet = new Gson().fromJson(req.body(), Pet.class);
-//        pet = service.addPet(pet);
-//        return new Gson().toJson(pet);
-//    }
+
+    private Object handleCreateGame(Request req, Response res) throws ResponseException {
+        String authToken = req.headers("Authorization");
+        CreateGameRequest partialGameResponse = new Gson().fromJson(req.body(), CreateGameRequest.class);
+        CreateGameResponse gameResponse = gameService.createGame(new CreateGameRequest(authToken, partialGameResponse.gameName()));
+        res.status(200);
+        return new Gson().toJson(gameResponse);
+    }
 //
 //    private Object handleJoinGame(Request req, Response res) throws ResponseException {
 //        var pet = new Gson().fromJson(req.body(), Pet.class);

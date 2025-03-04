@@ -6,13 +6,14 @@ import exception.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Vector;
 
 public class MemoryGame implements GameDAO{
 
     private final HashMap<Integer, GameData> games = new HashMap<>();
 
     public GameData createGame(String gameName) throws ResponseException{
-        int gameID = 100000 + games.size();
+        int gameID = 1000 + games.size();
         GameData game = new GameData(null, null, gameID, gameName, new ChessGame());
         games.put(gameID, game);
         return game;
@@ -26,7 +27,8 @@ public class MemoryGame implements GameDAO{
     }
 
     public Collection<GameData> readGames() throws ResponseException{
-        return games.values();
+        Collection<GameData> gameList = games.values();
+        return gameList;
     }
 
     // Might need to edit to account for the wrong color being entered.
