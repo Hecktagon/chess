@@ -26,7 +26,7 @@ public class Server {
 
         clearService = new ClearService(authDAO, gameDAO, userDAO);
         userService = new UserService(authDAO, userDAO);
-//        gameService = new GameService(authDAO, gameDAO);
+        gameService = new GameService(authDAO, gameDAO);
 
         Spark.staticFiles.location("web");
 
@@ -34,8 +34,8 @@ public class Server {
         Spark.delete("/db", this::handleClearAll);
         Spark.post("/user", this::handleRegister);
         Spark.post("/session", this::handleLogin);
-//        Spark.delete("/session", this::handleLogout);
-//        Spark.get("/game", this::handleListGames);
+        Spark.delete("/session", this::handleLogout);
+        Spark.get("/game", this::handleListGames);
 //        Spark.post("/game", this::handleCreateGame);
 //        Spark.put("/game", this::handleJoinGame);
         Spark.exception(ResponseException.class, this::handleException);
@@ -73,24 +73,19 @@ public class Server {
         res.status(200);
         return new Gson().toJson(loginRes);
     }
-//
-//    private Object handleLogout(Request req, Response res) throws ResponseException {
-//        var id = Integer.parseInt(req.params(":id"));
-//        var pet = service.getPet(id);
-//        if (pet != null) {
-//            service.deletePet(id);
-//            res.status(204);
-//        } else {
-//            res.status(404);
-//        }
-//        return "";
-//    }
-//
-//    private Object handleListGames(Request req, Response res) throws ResponseException {
-//        res.type("application/json");
-//        var list = service.listPets().toArray();
-//        return new Gson().toJson(Map.of("pet", list));
-//    }
+
+    private Object handleLogout(Request req, Response res) throws ResponseException {
+        String authToken = req.headers("Authorization");
+        EmptyResponse logoutRes = userService.logout(new LogoutRequest(authToken));
+        res.status(200);
+        return "";
+    }
+
+    private Object handleListGames(Request req, Response res) throws ResponseException {
+        String authToken = req.headers("Authorization");
+        var list = gameService.listGames().toArray();
+        return new Gson().toJson(Map.of("pet", list));
+    }
 //
 //    private Object handleCreateGame(Request req, Response res) throws ResponseException {
 //        var pet = new Gson().fromJson(req.body(), Pet.class);

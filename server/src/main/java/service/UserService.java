@@ -9,6 +9,8 @@ import resReq.LoginRequest;
 import resReq.LoginResponse;
 import resReq.RegisterRequest;
 import resReq.RegisterResponse;
+import resReq.LogoutRequest;
+import resReq.EmptyResponse;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -23,12 +25,12 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public RegisterResponse register(RegisterRequest userReq) throws ResponseException {
-        UserData userCheck = userDAO.getUser(userReq.username());
+    public RegisterResponse register(RegisterRequest userRequest) throws ResponseException {
+        UserData userCheck = userDAO.getUser(userRequest.username());
 
         // if user doesn't already exist, make new user and auth token
         if (userCheck == null){
-            UserData userData = new UserData(userReq.username(), userReq.password(), userReq.email());
+            UserData userData = new UserData(userRequest.username(), userRequest.password(), userRequest.email());
             userData = userDAO.createUser(userData);
             if (userData.username() == null || userData.password() == null || userData.email() == null ||
             userData.username().isEmpty() || userData.password().isEmpty() || userData.email().isEmpty()){
@@ -55,6 +57,14 @@ public class UserService {
              return new LoginResponse(loginRequest.username(), uuid);
          }
          throw new ResponseException(401, "Error: no such user" );
+    }
 
+    public EmptyResponse logout(LogoutRequest logoutRequest) throws ResponseException {
+        AuthData auth = authDAO.getAuth(logoutRequest.authToken());
+        if (auth != null){
+            authDAO.deleteAuth(auth.authToken());
+            return new EmptyResponse();
+        }
+        throw new ResponseException(401, "Error: unauthorized");
     }
 }
