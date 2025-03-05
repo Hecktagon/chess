@@ -209,12 +209,13 @@ public class ChessPiece {
                     boolean valid = isValid[0];
                     boolean captured = isValid[1];
 
-                    if (valid) {
-                        moves.add(curMove);
-                        if (captured && !(myPiece.getPieceType() == PieceType.PAWN && promo != null)) {
-                            break;
-                        }
-                    } else {
+                    if (!valid) {
+                        break;
+                    }
+
+                    moves.add(curMove);
+
+                    if (captured && !(myPiece.getPieceType() == PieceType.PAWN && promo != null)) {
                         break;
                     }
                 }
