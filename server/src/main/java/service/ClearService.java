@@ -1,6 +1,6 @@
 package service;
 import exception.ResponseException;
-import dataAccess.*;
+import dataaccess.*;
 
 public class ClearService {
     AuthDAO authDAO;

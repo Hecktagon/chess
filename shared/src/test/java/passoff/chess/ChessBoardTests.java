@@ -26,13 +26,13 @@ public class ChessBoardTests {
 
         ChessPiece foundPiece = board.getPiece(position);
 
-        String string_piece = piece.toString();
-        String string_foundPiece = foundPiece.toString();
+        String stringPiece = piece.toString();
+        String stringFoundPiece = foundPiece.toString();
 
         Assertions.assertEquals(piece.getPieceType(), foundPiece.getPieceType(),
-                "ChessPiece " + string_foundPiece + " returned by getPiece had the wrong piece type. Expected: " + string_piece);
+                "ChessPiece " + stringFoundPiece + " returned by getPiece had the wrong piece type. Expected: " + stringPiece);
         Assertions.assertEquals(piece.getTeamColor(), foundPiece.getTeamColor(),
-                "ChessPiece " + string_foundPiece + " returned by getPiece had the wrong team color. Expected: " + string_piece);
+                "ChessPiece " + stringFoundPiece + " returned by getPiece had the wrong team color. Expected: " + stringPiece);
     }
 
 

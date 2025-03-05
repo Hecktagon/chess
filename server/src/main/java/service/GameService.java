@@ -1,11 +1,11 @@
 package service;
 
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
+import dataaccess.AuthDAO;
+import dataaccess.GameDAO;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
-import resReq.*;
+import resreq.*;
 
 import java.util.Vector;
 

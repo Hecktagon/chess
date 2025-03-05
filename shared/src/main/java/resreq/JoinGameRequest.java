@@ -1,4 +1,4 @@
-package resReq;
+package resreq;
 
 import chess.ChessGame;
 

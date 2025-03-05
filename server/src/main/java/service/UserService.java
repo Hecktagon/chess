@@ -1,16 +1,16 @@
 package service;
 
-import dataAccess.AuthDAO;
-import dataAccess.UserDAO;
+import dataaccess.AuthDAO;
+import dataaccess.UserDAO;
 import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
-import resReq.LoginRequest;
-import resReq.LoginResponse;
-import resReq.RegisterRequest;
-import resReq.RegisterResponse;
-import resReq.LogoutRequest;
-import resReq.EmptyResponse;
+import resreq.LoginRequest;
+import resreq.LoginResponse;
+import resreq.RegisterRequest;
+import resreq.RegisterResponse;
+import resreq.LogoutRequest;
+import resreq.EmptyResponse;
 
 import java.util.Objects;
 import java.util.UUID;

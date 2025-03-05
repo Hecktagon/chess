@@ -1,13 +1,11 @@
 package service;
 
-import dataAccess.MemoryAuth;
-import dataAccess.MemoryGame;
-import dataAccess.MemoryUser;
+import dataaccess.MemoryAuth;
+import dataaccess.MemoryGame;
+import dataaccess.MemoryUser;
 import exception.ResponseException;
 import org.junit.jupiter.api.*;
-import resReq.*;
-import service.UserService;
-import service.ClearService;
+import resreq.*;
 
 public class UserServiceTests {
     MemoryAuth memoryAuth = new MemoryAuth();
@@ -39,7 +37,7 @@ public class UserServiceTests {
         ResponseException exception  = Assertions.assertThrows(ResponseException.class, () ->
         userService.register(new RegisterRequest(null, null, null))
     );
-        Assertions.assertEquals(400, exception.StatusCode());
+        Assertions.assertEquals(400, exception.statusCode());
     }
 
     @Test
@@ -55,7 +53,7 @@ public class UserServiceTests {
         ResponseException exception  = Assertions.assertThrows(ResponseException.class, () ->
                 userService.register(new RegisterRequest(username, password, email))
         );
-        Assertions.assertEquals(403, exception.StatusCode());
+        Assertions.assertEquals(403, exception.statusCode());
     }
 
     @Test
@@ -87,7 +85,7 @@ public class UserServiceTests {
         userService.login(new LoginRequest(username, password))
         );
 
-        Assertions.assertEquals(401, exception.StatusCode());
+        Assertions.assertEquals(401, exception.statusCode());
     }
 
     @Test
@@ -119,7 +117,7 @@ public class UserServiceTests {
         ResponseException exception  = Assertions.assertThrows(ResponseException.class, () ->
                 userService.logout(new LogoutRequest("NOTANAUTHTOKEN")));
 
-        Assertions.assertEquals(401, exception.StatusCode());
+        Assertions.assertEquals(401, exception.statusCode());
     }
 
 

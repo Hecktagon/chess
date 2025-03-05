@@ -1,14 +1,12 @@
 package server;
-import dataAccess.*;
-import model.UserData;
+import dataaccess.*;
 import service.GameService;
 import service.UserService;
 import spark.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.UserData;
 import service.ClearService;
-import resReq.*;
+import resreq.*;
 
 import java.util.Map;
 
@@ -105,7 +103,7 @@ public class Server {
     }
 
     private void handleException(ResponseException ex, Request req, Response res) {
-        res.status(ex.StatusCode());
+        res.status(ex.statusCode());
         res.body(ex.toJson());
     }
 }

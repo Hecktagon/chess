@@ -28,16 +28,16 @@ public class ChessMove {
         return castle;
     }
 
-    public void setCastle(boolean y_n) {
-        castle = y_n;
+    public void setCastle(boolean yesNo) {
+        castle = yesNo;
     }
 
     public boolean isEnPassant() {
         return enPassant;
     }
 
-    public void setEnPassant(boolean y_n) {
-        enPassant = y_n;
+    public void setEnPassant(boolean yesNo) {
+        enPassant = yesNo;
     }
 
     /**

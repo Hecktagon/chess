@@ -1,11 +1,9 @@
-package dataAccess;
+package dataaccess;
 
-import model.GameData;
 import model.UserData;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Vector;
+
 import exception.*;
 
 public class MemoryUser implements UserDAO{
@@ -21,10 +19,6 @@ public class MemoryUser implements UserDAO{
             return users.get(username);
         }
         return null;
-    }
-
-    public Collection<UserData> readUsers() throws ResponseException{
-        return users.values();
     }
 
     public void deleteUser(String username) throws ResponseException{
