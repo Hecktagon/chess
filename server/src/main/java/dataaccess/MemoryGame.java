@@ -30,13 +30,17 @@ public class MemoryGame implements GameDAO{
         }
         GameData updatedGame;
         if(Objects.equals(playerColor, ChessGame.TeamColor.BLACK) && unupdatedGame.blackUsername() == null) {
-            updatedGame = new GameData(unupdatedGame.whiteUsername(), userName, unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
+            updatedGame = new GameData(unupdatedGame.whiteUsername(), userName, unupdatedGame.gameID(),
+            unupdatedGame.gameName(), unupdatedGame.chessGame());
+
             games.remove(gameID);
             games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
         }
         if (Objects.equals(playerColor, ChessGame.TeamColor.WHITE) && unupdatedGame.whiteUsername() == null) {
-            updatedGame = new GameData(userName, unupdatedGame.blackUsername(), unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
+            updatedGame = new GameData(userName, unupdatedGame.blackUsername(), unupdatedGame.gameID(),
+            unupdatedGame.gameName(), unupdatedGame.chessGame());
+
             games.remove(gameID);
             games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
