@@ -211,10 +211,7 @@ public class ChessPiece {
 
                     if (valid) {
                         moves.add(curMove);
-                        if (captured) {
-                            if (myPiece.getPieceType() == PieceType.PAWN && promo != null) {
-                                continue;
-                            }
+                        if (captured && !(myPiece.getPieceType() == PieceType.PAWN && promo != null)) {
                             break;
                         }
                     } else {
