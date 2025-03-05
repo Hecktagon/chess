@@ -19,11 +19,14 @@ public class GameServiceTests {
     final ClearService clearService = new ClearService(memoryAuth, memoryGame, memoryUser);
     final GameService gameService = new GameService(memoryAuth, memoryGame);
 
-    private RegisterResponse registerBob() throws ResponseException {
-        String username = "Bob";
-        String password = "boB";
-        String email = "bob@hotmail.com";
+    private RegisterResponse registerUser(String username, String password, String email) throws ResponseException {
         return userService.register(new RegisterRequest(username, password, email));
+    }
+
+    private CreateGameResponse createAndJoinGame(String authToken, ChessGame.TeamColor teamColor) throws ResponseException {
+        CreateGameResponse gameResponse = gameService.createGame(new CreateGameRequest(authToken, "CoolGame"));
+        gameService.joinGame(new JoinGameRequest(teamColor, gameResponse.gameID(), authToken));
+        return gameResponse;
     }
 
     @Test
@@ -31,7 +34,7 @@ public class GameServiceTests {
     public void createGamePass() throws ResponseException {
         clearService.clearAll();
         System.out.print("TESTING: Create Game Success\n\n");
-        RegisterResponse registered = registerBob();
+        RegisterResponse registered = registerUser("Bob", "boB", "bob@hotmail.com");
 
         CreateGameResponse actual = gameService.createGame(new CreateGameRequest(registered.authToken(), "CoolGame"));
         System.out.print("Response:\n");
@@ -57,7 +60,7 @@ public class GameServiceTests {
     public void listGamePass() throws ResponseException {
         clearService.clearAll();
         System.out.print("TESTING: List Game Success\n\n");
-        RegisterResponse registered = registerBob();
+        RegisterResponse registered = registerUser("Bob", "boB", "bob@hotmail.com");
 
         gameService.createGame(new CreateGameRequest(registered.authToken(), "CoolGame"));
 
@@ -84,34 +87,27 @@ public class GameServiceTests {
     @DisplayName("Join Game Success")
     public void joinGamePass() throws ResponseException {
         clearService.clearAll();
-        System.out.print("TESTING: List Game Success\n\n");
+        System.out.print("TESTING: Join Game Success\n\n");
 
         System.out.print("\nRegistering User:\n");
-        RegisterResponse registered = registerBob();
+        RegisterResponse registered = registerUser("Bob", "boB", "bob@hotmail.com");
         System.out.print(registered + "\n");
 
-        System.out.print("\nCreating Game:\n");
-        CreateGameResponse gameResponse = gameService.createGame(new CreateGameRequest(registered.authToken(), "CoolGame"));
-        System.out.print(registered + "\n");
+        System.out.print("\nCreating and Joining Game:\n");
+        CreateGameResponse gameResponse = createAndJoinGame(registered.authToken(), ChessGame.TeamColor.WHITE);
+        System.out.print(gameResponse + "\n");
 
-        System.out.print("\nJoining Game:\n");
-        gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResponse.gameID(), registered.authToken()));
-        ListGamesResponse listGames =  gameService.listGames(new ListGamesRequest(registered.authToken()));
+        ListGamesResponse listGames = gameService.listGames(new ListGamesRequest(registered.authToken()));
         System.out.print(listGames + "\n");
 
-        String username2 = "Billy";
-        String password2 = "ylliB";
-        String email2 = "billy@hotmail.com";
-
         System.out.print("\nRegistering User 2:\n");
-        RegisterResponse registered2 =  userService.register(new RegisterRequest(username2, password2, email2));
-        System.out.print(registered + "\n");
+        RegisterResponse registered2 = registerUser("Billy", "ylliB", "billy@hotmail.com");
+        System.out.print(registered2 + "\n");
 
         System.out.print("\nUser 2 Attempts To Join Game:\n");
         gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.BLACK, gameResponse.gameID(), registered2.authToken()));
 
-
-        ListGamesResponse listGamesFinal =  gameService.listGames(new ListGamesRequest(registered2.authToken()));
+        ListGamesResponse listGamesFinal = gameService.listGames(new ListGamesRequest(registered2.authToken()));
         System.out.print(listGamesFinal + "\n");
         Assertions.assertNotNull(listGamesFinal);
     }
@@ -120,31 +116,25 @@ public class GameServiceTests {
     @DisplayName("Join Game Fail: already taken")
     public void joinGameFail403() throws ResponseException {
         clearService.clearAll();
-        System.out.print("TESTING: List Game Success\n\n");
+        System.out.print("TESTING: Join Game Fail: already taken\n\n");
 
         System.out.print("\nRegistering User:\n");
-        RegisterResponse registered = registerBob();
+        RegisterResponse registered = registerUser("Bob", "boB", "bob@hotmail.com");
         System.out.print(registered + "\n");
 
-        System.out.print("\nCreating Game:\n");
-        CreateGameResponse gameResponse = gameService.createGame(new CreateGameRequest(registered.authToken(), "CoolGame"));
-        System.out.print(registered + "\n");
+        System.out.print("\nCreating and Joining Game:\n");
+        CreateGameResponse gameResponse = createAndJoinGame(registered.authToken(), ChessGame.TeamColor.WHITE);
+        System.out.print(gameResponse + "\n");
 
-        System.out.print("\nJoining Game:\n");
-        gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResponse.gameID(), registered.authToken()));
-        ListGamesResponse listGames =  gameService.listGames(new ListGamesRequest(registered.authToken()));
+        ListGamesResponse listGames = gameService.listGames(new ListGamesRequest(registered.authToken()));
         System.out.print(listGames + "\n");
 
-        String username2 = "Billy";
-        String password2 = "ylliB";
-        String email2 = "billy@hotmail.com";
-
         System.out.print("\nRegistering User 2:\n");
-        RegisterResponse registered2 =  userService.register(new RegisterRequest(username2, password2, email2));
+        RegisterResponse registered2 = registerUser("Billy", "ylliB", "billy@hotmail.com");
         System.out.print(registered2 + "\n");
 
         System.out.print("\nUser 2 Attempts To Join Game:\n");
-        ResponseException exception  = Assertions.assertThrows(ResponseException.class, () ->
+        ResponseException exception = Assertions.assertThrows(ResponseException.class, () ->
                 gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResponse.gameID(), registered2.authToken()))
         );
         Assertions.assertEquals(403, exception.statusCode());
