@@ -1,5 +1,6 @@
 package dataAccess;
 
+import chess.ChessGame;
 import model.GameData;
 import java.util.Collection;
 import exception.*;
@@ -11,7 +12,7 @@ public interface GameDAO {
 
     Collection<GameData> readGames() throws ResponseException;
 
-    GameData updateGame(String userName, String playerColor, Integer gameID) throws ResponseException;
+    GameData updateGame(String userName, ChessGame.TeamColor playerColor, Integer gameID) throws ResponseException;
 
     void deleteGame(Integer gameID) throws ResponseException;
 

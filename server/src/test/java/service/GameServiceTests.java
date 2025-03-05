@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataAccess.MemoryAuth;
 import dataAccess.MemoryGame;
 import dataAccess.MemoryUser;
@@ -99,10 +100,10 @@ public class GameServiceTests {
         System.out.print(registered + "\n");
 
         System.out.print("\nJoining Game:\n");
-        gameService.joinGame(new JoinGameRequest("WHITE", gameResponse.gameID(), registered.authToken()));
+        gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResponse.gameID(), registered.authToken()));
         ListGamesResponse listGames =  gameService.listGames(new ListGamesRequest(registered.authToken()));
         System.out.print(listGames + "\n");
-
+        
         String username2 = "Billy";
         String password2 = "ylliB";
         String email2 = "billy@hotmail.com";
@@ -112,7 +113,7 @@ public class GameServiceTests {
         System.out.print(registered + "\n");
 
         System.out.print("\nUser 2 Attempts To Join Game:\n");
-        gameService.joinGame(new JoinGameRequest("BLACK", gameResponse.gameID(), registered2.authToken()));
+        gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.BLACK, gameResponse.gameID(), registered2.authToken()));
 
 
         ListGamesResponse listGamesFinal =  gameService.listGames(new ListGamesRequest(registered2.authToken()));
@@ -138,7 +139,7 @@ public class GameServiceTests {
         System.out.print(registered + "\n");
 
         System.out.print("\nJoining Game:\n");
-        gameService.joinGame(new JoinGameRequest("WHITE", gameResponse.gameID(), registered.authToken()));
+        gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResponse.gameID(), registered.authToken()));
         ListGamesResponse listGames =  gameService.listGames(new ListGamesRequest(registered.authToken()));
         System.out.print(listGames + "\n");
 
@@ -148,11 +149,11 @@ public class GameServiceTests {
 
         System.out.print("\nRegistering User 2:\n");
         RegisterResponse registered2 =  userService.register(new RegisterRequest(username2, password2, email2));
-        System.out.print(registered + "\n");
+        System.out.print(registered2 + "\n");
 
         System.out.print("\nUser 2 Attempts To Join Game:\n");
         ResponseException exception  = Assertions.assertThrows(ResponseException.class, () ->
-            gameService.joinGame(new JoinGameRequest("WHITE", gameResponse.gameID(), registered2.authToken()))
+            gameService.joinGame(new JoinGameRequest(ChessGame.TeamColor.WHITE, gameResponse.gameID(), registered2.authToken()))
         );
         Assertions.assertEquals(403, exception.StatusCode());
     }

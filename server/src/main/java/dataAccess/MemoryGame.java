@@ -29,26 +29,26 @@ public class MemoryGame implements GameDAO{
         return gameList;
     }
 
-    public GameData updateGame(String userName, String playerColor, Integer gameID) throws ResponseException{
+    public GameData updateGame(String userName, ChessGame.TeamColor playerColor, Integer gameID) throws ResponseException{
         System.out.print("Player trying to join as " + playerColor + "\n");
         GameData unupdatedGame = games.get(gameID);
         if(unupdatedGame == null){
-
+            throw new ResponseException(400,  "Error: bad request, game was null");
         }
         GameData updatedGame;
-        if(Objects.equals(playerColor, "BLACK") && unupdatedGame.blackUserName() == null) {
-            updatedGame = new GameData(unupdatedGame.whiteUserName(), userName, unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
+        if(Objects.equals(playerColor, ChessGame.TeamColor.BLACK) && unupdatedGame.blackUsername() == null) {
+            updatedGame = new GameData(unupdatedGame.whiteUsername(), userName, unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
             games.remove(gameID);
             games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
         }
-        if (Objects.equals(playerColor, "WHITE") && unupdatedGame.whiteUserName() == null) {
-            updatedGame = new GameData(userName, unupdatedGame.blackUserName(), unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
+        if (Objects.equals(playerColor, ChessGame.TeamColor.WHITE) && unupdatedGame.whiteUsername() == null) {
+            updatedGame = new GameData(userName, unupdatedGame.blackUsername(), unupdatedGame.gameID(), unupdatedGame.gameName(), unupdatedGame.chessGame());
             games.remove(gameID);
             games.put(updatedGame.gameID(), updatedGame);
             return updatedGame;
         }
-        if (!Objects.equals(playerColor, "WHITE") && !Objects.equals(playerColor, "BLACK")) {
+        if (!Objects.equals(playerColor, ChessGame.TeamColor.WHITE) && !Objects.equals(playerColor, ChessGame.TeamColor.BLACK)) {
 
             throw new ResponseException(400, "Error: bad request");
         }
