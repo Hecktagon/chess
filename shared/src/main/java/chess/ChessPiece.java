@@ -170,15 +170,6 @@ public class ChessPiece {
     }
 
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        /* STRUCTURE:
-        an array of arrays of directions to move, as well as a range of how many spaces they can move.
-        [
-        [to_row, to_col, range (if 0, unlimited)], promotes (0 or 1),
-        [to_row, to_col, range, promotes],
-        [to_row, to_col, range, promotes]
-        ]
-        */
-
         HashSet<ChessMove> moves = new HashSet<>();
 
         ChessPiece myPiece = board.getPiece(myPosition);
@@ -188,65 +179,65 @@ public class ChessPiece {
         int myY = myPosition.getRow();
         int myX = myPosition.getColumn();
 
-        // loop through each direction the piece can move, i.e. each inner array
-        eachDirection:
-        for(int[]direction : directions){
+        for (int[] direction : directions) {
             int yDir = direction[0];
             int xDir = direction[1];
             int range = direction[2] == 0 ? 10 : direction[2];
             boolean promotes = direction[3] == 1;
             ChessPiece.PieceType[] promos = promotionsArray(promotes);
 
-            // the position of our target space, will be incremented in our current direction in the next loop.
             int targetY = myY + yDir;
             int targetX = myX + xDir;
-            ChessPosition targetPos;
-            ChessMove curMove;
 
-            // check spaces in that direction until we hit the piece's range
-            for(int i = 0; i < range; i++){
-                targetPos = new ChessPosition(targetY, targetX);
+            for (int i = 0; i < range; i++) {
+                ChessPosition targetPos = new ChessPosition(targetY, targetX);
                 targetY += yDir;
                 targetX += xDir;
 
-                if (targetPos.posInBounds()){
-                    int promoCount = 1;
-                    // make a new move and decide if valid for each promotion (either null or Q, N, B, R)
-                    for(ChessPiece.PieceType promo : promos) {
-                        curMove = new ChessMove(myPosition, targetPos, promo);
-                        promoCount++;
+                if (!targetPos.posInBounds()) {
+                    break;
+                }
 
-                        boolean[] isValid = board.isValidMove(curMove);
-                        boolean valid = isValid[0];
-                        boolean captured = isValid[1];
+                ChessPiece targetPiece = board.getPiece(targetPos);
+                if (targetPiece != null && targetPiece.getTeamColor() == myPiece.getTeamColor()) {
+                    break;
+                }
 
-                        if (valid){
-                            moves.add(curMove);
-                            if (captured){
-                                /* this if statement and the promoCount counter prevent the loop
-                                from breaking on a capture until all promotions have been handled */
-                                if (myPiece.getPieceType() == PieceType.PAWN && promoCount <= 4){
-                                    continue;
-                                }
-                                continue eachDirection;
+                for (ChessPiece.PieceType promo : promos) {
+                    ChessMove curMove = new ChessMove(myPosition, targetPos, promo);
+                    boolean[] isValid = board.isValidMove(curMove);
+                    boolean valid = isValid[0];
+                    boolean captured = isValid[1];
+
+                    if (valid) {
+                        moves.add(curMove);
+                        if (captured) {
+                            if (myPiece.getPieceType() == PieceType.PAWN && promo != null) {
+                                continue;
                             }
-                        } else {
-                            continue eachDirection;
+                            break;
                         }
+                    } else {
+                        break;
                     }
+                }
+
+                if (targetPiece != null) {
+                    break;
                 }
             }
         }
-        if (pieceType == PieceType.KING){
+
+        if (pieceType == PieceType.KING) {
             moves.addAll(castle(board, myPosition));
         }
-        if (pieceType == PieceType.PAWN){
+        if (pieceType == PieceType.PAWN) {
             ChessMove enPass = enPassant(board, myPosition);
             if (enPass != null) {
                 moves.add(enPass);
             }
         }
-//        printMoves(board, myPosition, moves);
+
         return moves;
     }
 
