@@ -21,10 +21,6 @@ public class MemoryUser implements UserDAO{
         return null;
     }
 
-    public void deleteUser(String username) throws ResponseException{
-        users.remove(username);
-    }
-
     public void clearUsers() throws ResponseException{
         users.clear();
     }

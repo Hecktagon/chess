@@ -9,8 +9,6 @@ public interface AuthDAO {
 
     AuthData getAuth(String authToken) throws ResponseException;
 
-    Collection<AuthData> readAuths() throws ResponseException;
-
     void deleteAuth(String authToken) throws ResponseException;
 
     void clearAuths() throws ResponseException;

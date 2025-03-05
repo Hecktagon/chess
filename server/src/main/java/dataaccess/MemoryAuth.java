@@ -2,7 +2,6 @@ package dataaccess;
 
 import model.AuthData;
 import exception.*;
-import java.util.Collection;
 import java.util.HashMap;
 
 public class MemoryAuth implements AuthDAO{
@@ -18,10 +17,6 @@ public class MemoryAuth implements AuthDAO{
             return auths.get(authToken);
         }
         return null;
-    }
-
-    public Collection<AuthData> readAuths() throws ResponseException{
-        return auths.values();
     }
 
     public void deleteAuth(String authToken) throws ResponseException{

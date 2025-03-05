@@ -34,24 +34,6 @@ public class ChessPiece {
         numMoves++;
     }
 
-    public void printMoves(ChessBoard board, ChessPosition myPos, HashSet<ChessMove> moves){
-        System.out.print("\n");
-        for(int i = 8; i > 0; i--){
-            for(int j = 1; j <= 8; j++){
-                ChessPosition curPos = new ChessPosition(i, j);
-                ChessPiece curPiece = board.getPiece(curPos);
-                System.out.print("|");
-                if (curPiece == null && moves.contains(new ChessMove(myPos, curPos, null))){
-                    System.out.print("#");
-                } else {
-                    System.out.print(board.shortcutMap(curPiece));
-                }
-            }
-            System.out.print("|\n");
-        }
-        System.out.print("\n");
-    }
-
     /**
      * The various different chess piece options
      */

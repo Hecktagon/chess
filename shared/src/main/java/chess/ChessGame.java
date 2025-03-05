@@ -239,12 +239,10 @@ public class ChessGame {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition curPos = new ChessPosition(i, j);
                 ChessPiece curPiece = myBoard.getPiece(curPos);
-                if (curPiece != null) {
-                    if (curPiece.getTeamColor() == team) {
-                        Collection<ChessMove> curMoves = curPiece.pieceMoves(myBoard, curPos);
-                        for (ChessMove move : curMoves){
-                            attacks.add(move.getEndPosition());
-                        }
+                if (curPiece != null && curPiece.getTeamColor() == team) {
+                    Collection<ChessMove> curMoves = curPiece.pieceMoves(myBoard, curPos);
+                    for (ChessMove move : curMoves){
+                        attacks.add(move.getEndPosition());
                     }
                 }
             }

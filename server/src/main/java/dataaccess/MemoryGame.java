@@ -17,13 +17,6 @@ public class MemoryGame implements GameDAO{
         return game;
     }
 
-    public GameData getGame(Integer gameID) throws ResponseException{
-        if (games.containsKey(gameID)){
-            return games.get(gameID);
-        }
-        throw new ResponseException(400, "No such game.");
-    }
-
     public Collection<GameData> readGames() throws ResponseException{
         Collection<GameData> gameList = games.values();
         return gameList;
@@ -53,10 +46,6 @@ public class MemoryGame implements GameDAO{
             throw new ResponseException(400, "Error: bad request");
         }
         throw new ResponseException(403, "Error: already taken");
-    }
-
-    public void deleteGame(Integer gameID) throws ResponseException{
-        games.remove(gameID);
     }
 
     public void clearGames() throws ResponseException{
