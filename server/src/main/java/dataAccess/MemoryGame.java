@@ -30,7 +30,7 @@ public class MemoryGame implements GameDAO{
     }
 
     public GameData updateGame(String userName, String playerColor, Integer gameID) throws ResponseException{
-        System.out.print(playerColor);
+        System.out.print("Player trying to join as " + playerColor + "\n");
         GameData unupdatedGame = games.get(gameID);
         if(unupdatedGame == null){
 
