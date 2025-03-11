@@ -16,12 +16,25 @@ public class Server {
     UserService userService;
     GameService gameService;
 
+
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
-        AuthDAO authDAO = new MemoryAuth();
-        UserDAO userDAO = new MemoryUser();
-        GameDAO gameDAO = new MemoryGame();
+        AuthDAO authDAO;
+        UserDAO userDAO;
+        GameDAO gameDAO;
+
+        // Try to open as SQL Database, if failed open as memory database instead.
+        try {
+            authDAO = new SqlAuth();
+            userDAO = new SqlUser();
+            gameDAO = new SqlGame();
+        } catch (Throwable exception) {
+            System.out.print("SQL failed with:\n" + exception.getMessage() + "\nSwitching to memory.\n");
+            authDAO = new MemoryAuth();
+            userDAO = new MemoryUser();
+            gameDAO = new MemoryGame();
+        }
 
         clearService = new ClearService(authDAO, gameDAO, userDAO);
         userService = new UserService(authDAO, userDAO);

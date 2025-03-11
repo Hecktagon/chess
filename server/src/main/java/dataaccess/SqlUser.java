@@ -2,18 +2,38 @@ package dataaccess;
 
 import exception.ResponseException;
 import model.UserData;
+import java.sql.*;
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static java.sql.Types.NULL;
 
 public class SqlUser implements UserDAO{
     public UserData createUser(UserData user) throws ResponseException{
-        return null;
+//        var statement = "INSERT INTO pet (name, type, json) VALUES (?, ?, ?)";
+//        var json = new Gson().toJson(pet);
+//        var id = executeUpdate(statement, pet.name(), pet.type(), json);
+//        return new Pet(id, pet.name(), pet.type());
     }
 
     public UserData getUser(String userName) throws ResponseException{
-        return null;
+//        try (var conn = DatabaseManager.getConnection()) {
+//            var statement = "SELECT id, json FROM pet WHERE id=?";
+//            try (var ps = conn.prepareStatement(statement)) {
+//                ps.setInt(1, id);
+//                try (var rs = ps.executeQuery()) {
+//                    if (rs.next()) {
+//                        return readPet(rs);
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+//        }
+//        return null;
     }
 
     public void clearUsers() throws ResponseException{
-
+//        var statement = "TRUNCATE pet";
+//        executeUpdate(statement);
     }
 
 }
