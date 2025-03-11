@@ -7,6 +7,11 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class SqlUser implements UserDAO{
+
+    public SqlUser() throws ResponseException {
+        configureUserDatabase();
+    }
+
     public UserData createUser(UserData user) throws ResponseException{
 //        var statement = "INSERT INTO pet (name, type, json) VALUES (?, ?, ?)";
 //        var json = new Gson().toJson(pet);
@@ -34,6 +39,19 @@ public class SqlUser implements UserDAO{
     public void clearUsers() throws ResponseException{
 //        var statement = "TRUNCATE pet";
 //        executeUpdate(statement);
+    }
+
+    private void configureDatabase() throws ResponseException {
+        DatabaseManager.createDatabase();
+        try (var conn = DatabaseManager.getConnection()) {
+            for (var statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
+        }
     }
 
 }
