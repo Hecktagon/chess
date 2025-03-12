@@ -17,6 +17,7 @@ public class SqlUser implements UserDAO{
 //        var json = new Gson().toJson(pet);
 //        var id = executeUpdate(statement, pet.name(), pet.type(), json);
 //        return new Pet(id, pet.name(), pet.type());
+        return null;
     }
 
     public UserData getUser(String userName) throws ResponseException{
@@ -33,7 +34,7 @@ public class SqlUser implements UserDAO{
 //        } catch (Exception e) {
 //            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
 //        }
-//        return null;
+        return null;
     }
 
     public void clearUsers() throws ResponseException{
@@ -41,7 +42,19 @@ public class SqlUser implements UserDAO{
 //        executeUpdate(statement);
     }
 
-    private void configureDatabase() throws ResponseException {
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS  user (
+              `username` varchar(256) NOT NULL,
+              `password` varchar(256) NOT NULL,
+              `email` varchar(256) NOT NULL,
+              PRIMARY KEY (`username`),
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+    };
+
+
+    private void configureUserDatabase() throws ResponseException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             for (var statement : createStatements) {
