@@ -10,7 +10,9 @@ public interface GameDAO {
 
     Collection<GameData> readGames() throws ResponseException;
 
-    GameData updateGame(String userName, ChessGame.TeamColor playerColor, Integer gameID) throws ResponseException;
+    GameData getGame(Integer gameID) throws ResponseException;
+
+    GameData updateGame(GameData gameData) throws ResponseException;
 
     void clearGames() throws ResponseException;
 

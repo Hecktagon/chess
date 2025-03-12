@@ -4,6 +4,7 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
+import model.AuthData;
 import model.GameData;
 
 import java.util.ArrayList;
@@ -41,6 +42,23 @@ public class SqlGame implements GameDAO {
             throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
         }
         return result;
+    }
+
+    private GameData getGame(int gameID) throws ResponseException{
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM game WHERE gameID=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);  // not sure if this is correct, don't really understand what's going on here.
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readGame(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return null;
     }
 
     // TODO: IMPLEMENT UPDATEGAME

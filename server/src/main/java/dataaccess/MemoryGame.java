@@ -18,38 +18,23 @@ public class MemoryGame implements GameDAO{
     }
 
     public Collection<GameData> readGames() throws ResponseException{
-        Collection<GameData> gameList = games.values();
-        return gameList;
+        return games.values();
     }
 
-    public GameData updateGame(String userName, ChessGame.TeamColor playerColor, Integer gameID) throws ResponseException{
-        System.out.print("Player trying to join as " + playerColor + "\n");
-        GameData unupdatedGame = games.get(gameID);
-        if(unupdatedGame == null){
-            throw new ResponseException(400,  "Error: bad request, game was null");
+    public GameData getGame(Integer gameID){
+        if (games.containsKey(gameID)){
+            return games.get(gameID);
         }
-        GameData updatedGame;
-        if(Objects.equals(playerColor, ChessGame.TeamColor.BLACK) && unupdatedGame.blackUsername() == null) {
-            updatedGame = new GameData(unupdatedGame.whiteUsername(), userName, unupdatedGame.gameID(),
-            unupdatedGame.gameName(), unupdatedGame.chessGame());
+        return null;
+    }
 
-            games.remove(gameID);
-            games.put(updatedGame.gameID(), updatedGame);
-            return updatedGame;
+    public GameData updateGame(GameData gameData){
+        if (games.containsKey(gameData.gameID())){
+            games.remove(gameData.gameID());
+            games.put(gameData.gameID(), gameData);
+            return gameData;
         }
-        if (Objects.equals(playerColor, ChessGame.TeamColor.WHITE) && unupdatedGame.whiteUsername() == null) {
-            updatedGame = new GameData(userName, unupdatedGame.blackUsername(), unupdatedGame.gameID(),
-            unupdatedGame.gameName(), unupdatedGame.chessGame());
-
-            games.remove(gameID);
-            games.put(updatedGame.gameID(), updatedGame);
-            return updatedGame;
-        }
-        if (!Objects.equals(playerColor, ChessGame.TeamColor.WHITE) && !Objects.equals(playerColor, ChessGame.TeamColor.BLACK)) {
-
-            throw new ResponseException(400, "Error: bad request");
-        }
-        throw new ResponseException(403, "Error: already taken");
+        return null;
     }
 
     public void clearGames() throws ResponseException{

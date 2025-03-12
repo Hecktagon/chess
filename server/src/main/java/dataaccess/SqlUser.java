@@ -1,11 +1,12 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import exception.ResponseException;
+import model.GameData;
 import model.UserData;
 import java.sql.*;
 import java.util.Objects;
-
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -19,37 +20,40 @@ public class SqlUser implements UserDAO{
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    private boolean hashedPassCompare(String password, String username) throws ResponseException{
-        UserData userData = getUser(username);
-        return Objects.equals(passHasher(password), userData.password());
-    }
-
     public UserData createUser(UserData user) throws ResponseException{
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-        executeUpdate(statement,user.username(), passHasher(user.password()), user.email());
-        return user;
+        String hashedPass = passHasher(user.password());
+        executeUpdate(statement,user.username(), hashedPass, user.email());
+        return new UserData(user.username(), hashedPass, user.email());
     }
 
     public UserData getUser(String userName) throws ResponseException{
-//        try (var conn = DatabaseManager.getConnection()) {
-//            var statement = "SELECT id, json FROM pet WHERE id=?";
-//            try (var ps = conn.prepareStatement(statement)) {
-//                ps.setInt(1, id);
-//                try (var rs = ps.executeQuery()) {
-//                    if (rs.next()) {
-//                        return readPet(rs);
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
-//        }
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM user WHERE username = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, userName);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readUser(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+        }
         return null;
     }
 
     public void clearUsers() throws ResponseException{
-//        var statement = "TRUNCATE pet";
-//        executeUpdate(statement);
+        var statement = "TRUNCATE user";
+        executeUpdate(statement);
+    }
+
+    private UserData readUser(ResultSet rs) throws SQLException {
+        var username = rs.getString("username");
+        var password = rs.getString("password");
+        var email = rs.getString("email");
+        return new UserData(username, password, email);
     }
 
     private final String[] createStatements = {

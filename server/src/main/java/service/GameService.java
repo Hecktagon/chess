@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
 import exception.ResponseException;
@@ -45,7 +46,29 @@ public class GameService {
             throw new ResponseException(401, "Error: unauthorized");
         }
 
-        GameData joinedGame = gameDAO.updateGame(auth.username(), joinGameRequest.playerColor(), joinGameRequest.gameID());
-        return new EmptyResponse();
+        GameData gameToJoin = gameDAO.getGame(joinGameRequest.gameID());
+        if(gameToJoin == null) {
+            throw new ResponseException(400,  "Error: bad request, no such game");
+        }
+
+        if (joinGameRequest.playerColor() == ChessGame.TeamColor.WHITE){
+            if (gameToJoin.whiteUsername() != null){
+                throw new ResponseException(403,  "Error: white already taken");
+            }
+            gameDAO.updateGame(new GameData(auth.username(), gameToJoin.blackUsername(),
+                    gameToJoin.gameID(), gameToJoin.gameName(), gameToJoin.chessGame()));
+            return new EmptyResponse();
+
+        } else if (joinGameRequest.playerColor() == ChessGame.TeamColor.BLACK){
+            if (gameToJoin.blackUsername() != null){
+                throw new ResponseException(403,  "Error: black already taken");
+            }
+            gameDAO.updateGame(new GameData(gameToJoin.whiteUsername(), auth.username(),
+                    gameToJoin.gameID(), gameToJoin.gameName(), gameToJoin.chessGame()));
+            return new EmptyResponse();
+
+        } else {
+            throw new ResponseException(400, "Error: bad request, invalid player color");
+        }
     }
 }
