@@ -92,7 +92,7 @@ public class SqlGame implements GameDAO {
               `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
               `chessGame` JSON NOT NULL,
-              PRIMARY KEY (`gameID`),
+              PRIMARY KEY (`gameID`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
