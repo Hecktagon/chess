@@ -1,8 +1,12 @@
 package dataaccess;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import com.google.gson.Gson;
 import exception.ResponseException;
 import model.GameData;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.sql.*;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -15,46 +19,77 @@ public class SqlGame implements GameDAO {
     }
 
     public GameData createGame(String gameName) throws ResponseException{
-//        var statement = "INSERT INTO pet (name, type, json) VALUES (?, ?, ?)";
-//        var json = new Gson().toJson(pet);
-//        var id = executeUpdate(statement, pet.name(), pet.type(), json);
-//        return new Pet(id, pet.name(), pet.type());
-        return null;
+        var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?, ?)";
+        ChessGame chessGame = new ChessGame();
+        var gameJson = new Gson().toJson(chessGame);
+        var id = executeUpdate(statement, NULL, NULL, gameName, gameJson);
+        return new GameData(null, null, id, gameName, chessGame);
     }
 
     public Collection<GameData> readGames() throws ResponseException{
-//        var result = new ArrayList<Pet>();
-//        try (var conn = DatabaseManager.getConnection()) {
-//            var statement = "SELECT id, json FROM pet";
-//            try (var ps = conn.prepareStatement(statement)) {
-//                try (var rs = ps.executeQuery()) {
-//                    while (rs.next()) {
-//                        result.add(readPet(rs));
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
-//        }
-//        return result;
-        return null;
+        var result = new ArrayList<GameData>();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM games";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(readGame(rs));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return result;
     }
 
+    // TODO: IMPLEMENT UPDATEGAME
     public GameData updateGame(String userName, ChessGame.TeamColor playerColor, Integer gameID) throws ResponseException{
         return null;
     }
 
     public void clearGames() throws ResponseException{
-//        var statement = "TRUNCATE pet";
-//        executeUpdate(statement);
+        var statement = "TRUNCATE game";
+        executeUpdate(statement);
+    }
+
+    private GameData readGame(ResultSet rs) throws SQLException {
+        var gameID = rs.getInt("gameID");
+        var white = rs.getString("whiteUsername");
+        var black = rs.getString("blackUsername");
+        var gameName = rs.getString("gameName");
+        var unSerializedGame = rs.getString("chessGame");
+        var chessGame = new Gson().fromJson(unSerializedGame, ChessGame.class);
+        return new GameData(white, black, gameID, gameName, chessGame);
+    }
+
+
+    private int executeUpdate(String statement, Object... params) throws ResponseException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
+                var rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
+        }
     }
 
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS game (
-              `gameID` int NOT NULL,
-              `whiteUsername` varchar(256) NOT NULL,
-              `blackUsername` varchar(256) NOT NULL,
+              `gameID` int NOT NULL AUTO_INCREMENT,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
               `chessGame` JSON NOT NULL,
               PRIMARY KEY (`gameID`),

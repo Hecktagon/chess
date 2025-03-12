@@ -11,7 +11,7 @@ public class MemoryGame implements GameDAO{
     private final HashMap<Integer, GameData> games = new HashMap<>();
 
     public GameData createGame(String gameName) throws ResponseException{
-        int gameID = 1000 + games.size();
+        int gameID = games.size();
         GameData game = new GameData(null, null, gameID, gameName, new ChessGame());
         games.put(gameID, game);
         return game;
