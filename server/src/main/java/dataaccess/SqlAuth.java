@@ -13,7 +13,7 @@ public class SqlAuth implements AuthDAO{
 
     public AuthData createAuth(AuthData auth) throws ResponseException{
         var statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
-        executeUpdate(statement, auth.authToken(), auth.username());
+        executeAuthUpdate(statement, auth.authToken(), auth.username());
         return auth;
     }
 
@@ -36,12 +36,12 @@ public class SqlAuth implements AuthDAO{
 
     public void deleteAuth(String authToken) throws ResponseException{
         var statement = "DELETE FROM auth WHERE authToken=?";
-        executeUpdate(statement, authToken);
+        executeAuthUpdate(statement, authToken);
     }
 
     public void clearAuths() throws ResponseException{
         var statement = "TRUNCATE auth";
-        executeUpdate(statement);
+        executeAuthUpdate(statement);
     }
 
     private final String[] createAuthStatements = {
@@ -60,13 +60,13 @@ public class SqlAuth implements AuthDAO{
         return new AuthData(authToken, username);
     }
 
-    private void executeUpdate(String statement, Object... params) throws ResponseException {
+    private void executeAuthUpdate(String statement, Object... params) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement(statement)) {
                 for (var i = 0; i < params.length; i++) {
-                    var param = params[i];
-                    if (param instanceof String p) {ps.setString(i + 1, p);}
-                    else if (param == null) {
+                    var authParam = params[i];
+                    if (authParam instanceof String p) {ps.setString(i + 1, p);}
+                    else if (authParam == null) {
                         ps.setNull(i + 1, NULL);
                     }
                 }
