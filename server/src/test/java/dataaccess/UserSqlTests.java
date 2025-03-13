@@ -8,29 +8,29 @@ import resreq.*;
 
 public class UserSqlTests {
 
-    static AuthDAO sqlAuth;
-    static UserDAO sqlUser;
-    static GameDAO sqlGame;
+    static AuthDAO sqlUserAuth;
+    static UserDAO sqlUserUser;
+    static GameDAO sqlUserGame;
 
     @BeforeAll
-    public static void setup() throws ResponseException {
-        sqlAuth = new SqlAuth();
-        sqlUser = new SqlUser();
-        sqlGame = new SqlGame();
+    public static void setupUser() throws ResponseException {
+        sqlUserAuth = new SqlAuth();
+        sqlUserUser = new SqlUser();
+        sqlUserGame = new SqlGame();
     }
 
     @BeforeEach
     public void clearer() throws ResponseException{
-        sqlAuth.clearAuths();
-        sqlGame.clearGames();
-        sqlUser.clearUsers();
+        sqlUserAuth.clearAuths();
+        sqlUserGame.clearGames();
+        sqlUserUser.clearUsers();
     }
 
     @Test
     @DisplayName("Create User Success")
     public void createUserPass() throws ResponseException {
         UserData testUser = new UserData("cool_user_name", "password123", "email@example.com");
-        UserData createdUser = sqlUser.createUser(testUser);
+        UserData createdUser = sqlUserUser.createUser(testUser);
         Assertions.assertNotNull(createdUser);
     }
 
@@ -39,7 +39,7 @@ public class UserSqlTests {
     public void createUserFail() throws ResponseException {
         UserData testerUser = new UserData(null, "password123", "email@example.com");
         ResponseException exception = Assertions.assertThrows(ResponseException.class, () ->
-                sqlUser.createUser(testerUser)
+                sqlUserUser.createUser(testerUser)
         );
         Assertions.assertEquals(400, exception.statusCode());
     }
@@ -48,15 +48,15 @@ public class UserSqlTests {
     @DisplayName("Get User Success")
     public void getUserPass() throws ResponseException {
         UserData testingUser = new UserData("cool_user_name", "password123", "email@example.com");
-        UserData createdUser = sqlUser.createUser(testingUser);
-        UserData gotUser = sqlUser.getUser(createdUser.username());
+        UserData createdUser = sqlUserUser.createUser(testingUser);
+        UserData gotUser = sqlUserUser.getUser(createdUser.username());
         Assertions.assertNotNull(gotUser);
     }
 
     @Test
     @DisplayName("Get User Fail")
     public void getUserFail() throws ResponseException {
-        UserData gotUser = sqlUser.getUser("no_such_user");
+        UserData gotUser = sqlUserUser.getUser("no_such_user");
         Assertions.assertNull(gotUser);
     }
 
@@ -64,9 +64,9 @@ public class UserSqlTests {
     @DisplayName("Clear Pass")
     public void clearPass() throws ResponseException {
         UserData testUser = new UserData("cool_user_name", "password123", "email@example.com");
-        UserData createdUser = sqlUser.createUser(testUser);
-        sqlUser.clearUsers();
-        UserData gotUser = sqlUser.getUser(testUser.username());
+        UserData createdUser = sqlUserUser.createUser(testUser);
+        sqlUserUser.clearUsers();
+        UserData gotUser = sqlUserUser.getUser(testUser.username());
         Assertions.assertNull(gotUser);
     }
 }
