@@ -22,8 +22,12 @@ public class SqlUser implements UserDAO{
 
     public UserData createUser(UserData user) throws ResponseException{
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-        String hashedPass = passHasher(user.password());
-        executeUpdate(statement,user.username(), hashedPass, user.email());
+        String hashedPass = (user.password() == null) ? null :  passHasher(user.password());
+        try {
+            executeUpdate(statement, user.username(), hashedPass, user.email());
+        } catch (Exception e) {
+            throw new ResponseException(400, "Error: bad request, invalid username, password, or email\n" + e.getMessage());
+        }
         return new UserData(user.username(), hashedPass, user.email());
     }
 

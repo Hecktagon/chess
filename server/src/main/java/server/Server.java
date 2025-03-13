@@ -1,4 +1,5 @@
 package server;
+
 import dataaccess.*;
 import service.GameService;
 import service.UserService;
@@ -7,7 +8,6 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import service.ClearService;
 import resreq.*;
-
 import java.util.Map;
 
 
