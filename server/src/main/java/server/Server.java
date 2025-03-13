@@ -29,6 +29,7 @@ public class Server {
             authDAO = new SqlAuth();
             userDAO = new SqlUser();
             gameDAO = new SqlGame();
+            System.out.print("Successfully launched SQL database!\n");
         } catch (Throwable exception) {
             System.out.print("SQL failed with:\n" + exception.getMessage() + "\nSwitching to memory.\n");
             authDAO = new MemoryAuth();

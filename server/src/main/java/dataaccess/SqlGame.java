@@ -20,17 +20,17 @@ public class SqlGame implements GameDAO {
     }
 
     public GameData createGame(String gameName) throws ResponseException{
-        var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, chessGame) VALUES (?, ?, ?, ?, ?)";
+        var statement = "INSERT INTO game (gameName, chessGame) VALUES (?, ?)";
         ChessGame chessGame = new ChessGame();
         var gameJson = new Gson().toJson(chessGame);
-        var id = executeUpdate(statement, NULL, NULL, gameName, gameJson);
+        var id = executeUpdate(statement, gameName, gameJson);
         return new GameData(null, null, id, gameName, chessGame);
     }
 
     public Collection<GameData> readGames() throws ResponseException{
         var result = new ArrayList<GameData>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT * FROM games";
+            var statement = "SELECT * FROM game";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -44,7 +44,7 @@ public class SqlGame implements GameDAO {
         return result;
     }
 
-    private GameData getGame(int gameID) throws ResponseException{
+    public GameData getGame(Integer gameID) throws ResponseException{
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM game WHERE gameID=?";
             try (var ps = conn.prepareStatement(statement)) {
@@ -62,8 +62,14 @@ public class SqlGame implements GameDAO {
     }
 
     // TODO: IMPLEMENT UPDATEGAME
-    public GameData updateGame(String userName, ChessGame.TeamColor playerColor, Integer gameID) throws ResponseException{
-        return null;
+    public GameData updateGame(GameData gameData) throws ResponseException{
+        var statement = """
+        UPDATE game
+        SET whiteUsername = ?, blackUsername = ?
+        WHERE gameID = ?
+        """;
+        executeUpdate(statement, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameID());
+        return gameData;
     }
 
     public void clearGames() throws ResponseException{
@@ -88,6 +94,7 @@ public class SqlGame implements GameDAO {
                 for (var i = 0; i < params.length; i++) {
                     var param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();

@@ -5,6 +5,7 @@ import dataaccess.UserDAO;
 import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import resreq.LoginRequest;
 import resreq.LoginResponse;
 import resreq.RegisterRequest;
@@ -49,7 +50,8 @@ public class UserService {
     public LoginResponse login(LoginRequest loginRequest) throws ResponseException {
          UserData userData = userDAO.getUser(loginRequest.username());
          if(userData != null){
-             if (!Objects.equals(userData.password(), loginRequest.password())){
+             if (!Objects.equals(userData.password(), loginRequest.password()) &&
+                     !BCrypt.checkpw(loginRequest.password(), userData.password())){
                  throw new ResponseException(401, "Error: unauthorized");
              }
              String uuid = UUID.randomUUID().toString();
