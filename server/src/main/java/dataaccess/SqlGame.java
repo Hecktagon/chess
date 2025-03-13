@@ -19,7 +19,7 @@ public class SqlGame implements GameDAO {
         configureGameDatabase();
     }
 
-    public GameData createGame(String gameName) throws ResponseException{
+    public GameData createGame(String gameName) throws ResponseException {
         var statement = "INSERT INTO game (gameName, chessGame) VALUES (?, ?)";
         ChessGame chessGame = new ChessGame();
         var gameJson = new Gson().toJson(chessGame);
@@ -64,7 +64,6 @@ public class SqlGame implements GameDAO {
         return null;
     }
 
-    // TODO: IMPLEMENT UPDATEGAME
     public GameData updateGame(GameData gameData) throws ResponseException{
         var statement = """
         UPDATE game
@@ -96,9 +95,15 @@ public class SqlGame implements GameDAO {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (var i = 0; i < params.length; i++) {
                     var param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param == null) ps.setNull(i + 1, NULL);
+                    if (param instanceof String p) {
+                        ps.setString(i + 1, p);
+                    }
+                    else if (param instanceof Integer p) {
+                        ps.setInt(i + 1, p);
+                    }
+                    else if (param == null) {
+                        ps.setNull(i + 1, NULL);
+                    }
                 }
                 ps.executeUpdate();
                 var rs = ps.getGeneratedKeys();
