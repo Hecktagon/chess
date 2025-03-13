@@ -45,6 +45,9 @@ public class SqlGame implements GameDAO {
     }
 
     public GameData getGame(Integer gameID) throws ResponseException{
+        if(gameID == null){
+            throw new ResponseException(400, "Error: gameID was null");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM game WHERE gameID=?";
             try (var ps = conn.prepareStatement(statement)) {
