@@ -22,8 +22,6 @@ public class GameSqlTests {
         sqlGame = new SqlGame();
     }
 
-
-
     @BeforeEach
     public void clearer() throws ResponseException{
         sqlAuth.clearAuths();
