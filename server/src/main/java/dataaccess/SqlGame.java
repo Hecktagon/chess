@@ -133,13 +133,11 @@ public class SqlGame implements GameDAO {
     private void configureGameDatabase() throws ResponseException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
+            try (var preparedStatement = conn.prepareStatement(createStatements[0])) {
+                preparedStatement.executeUpdate();
             }
         } catch (SQLException ex) {
-            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new ResponseException(500, String.format("Unable to configure game database: %s", ex.getMessage()));
         }
     }
 

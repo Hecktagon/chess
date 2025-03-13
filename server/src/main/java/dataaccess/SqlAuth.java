@@ -44,7 +44,7 @@ public class SqlAuth implements AuthDAO{
         executeUpdate(statement);
     }
 
-    private final String[] createStatements = {
+    private final String[] createAuthStatements = {
             """
             CREATE TABLE IF NOT EXISTS auth (
               `authToken` varchar(256) NOT NULL,
@@ -80,13 +80,13 @@ public class SqlAuth implements AuthDAO{
     private void configureAuthDatabase() throws ResponseException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
+            for (var authStatement : createAuthStatements) {
+                try (var preparedStatement = conn.prepareStatement(authStatement)) {
                     preparedStatement.executeUpdate();
                 }
             }
-        } catch (SQLException ex) {
-            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
+        } catch (SQLException authEx) {
+            throw new ResponseException(500, String.format("Unable to configure auth database: %s", authEx.getMessage()));
         }
     }
 }

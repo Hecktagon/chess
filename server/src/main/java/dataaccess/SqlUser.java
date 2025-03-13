@@ -60,7 +60,7 @@ public class SqlUser implements UserDAO{
         return new UserData(username, password, email);
     }
 
-    private final String[] createStatements = {
+    private final String[] createUserStatements = {
             """
             CREATE TABLE IF NOT EXISTS  user (
               `username` varchar(256) NOT NULL,
@@ -89,13 +89,13 @@ public class SqlUser implements UserDAO{
     private void configureUserDatabase() throws ResponseException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
+            for (var userStatement : createUserStatements) {
+                try (var preparedStatement = conn.prepareStatement(userStatement)) {
                     preparedStatement.executeUpdate();
                 }
             }
         } catch (SQLException ex) {
-            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new ResponseException(500, String.format("Unable to configure user database: %s", ex.getMessage()));
         }
     }
 

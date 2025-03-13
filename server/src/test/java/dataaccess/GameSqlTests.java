@@ -91,7 +91,8 @@ public class GameSqlTests {
     @DisplayName("Update Game Success")
     public void updateGamePass() throws ResponseException {
         GameData createdGame = sqlGame.createGame("newGame1");
-        GameData update = new GameData(createdGame.whiteUsername(), "The_Black_Knight", createdGame.gameID(), createdGame.gameName(), createdGame.chessGame());
+        GameData update = new GameData(createdGame.whiteUsername(), "The_Black_Knight",
+                createdGame.gameID(), createdGame.gameName(), createdGame.chessGame());
         GameData updatedGame = sqlGame.updateGame(update);
 
         Assertions.assertEquals(updatedGame.blackUsername(), update.blackUsername());
@@ -103,7 +104,8 @@ public class GameSqlTests {
     @DisplayName("Update Game Fail")
     public void updateGameFail() throws ResponseException {
         GameData createdGame = sqlGame.createGame("newGame1");
-        GameData badUpdate = new GameData(null, null, createdGame.gameID(), null, null);
+        GameData badUpdate = new GameData(null, null,
+                createdGame.gameID(), null, null);
         GameData updatedGame = sqlGame.updateGame(badUpdate);
         Assertions.assertEquals(badUpdate, updatedGame);
     }
