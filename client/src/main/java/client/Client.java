@@ -6,6 +6,7 @@ import exception.*;
 
 public class Client {
     private String visitorName = null;
+    private String authToken = null;
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.SIGNEDOUT;

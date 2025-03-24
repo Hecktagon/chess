@@ -4,8 +4,14 @@ import com.google.gson.Gson;
 //import exception.ErrorResponse;
 import exception.*;
 import resreq.*;
-import java.io.*;
-import java.net.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
 
 public class ServerFacade {
     private final String serverUrl;
@@ -14,34 +20,43 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public Pet addPet(Pet pet) throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
-    }
-
-    public void deletePet(int id) throws ResponseException {
-        var path = String.format("/pet/%s", id);
-        this.makeRequest("DELETE", path, null, null);
-    }
-
     public void clearAll() throws ResponseException {
-        var path = "/pet";
-        this.makeRequest("DELETE", path, null, null);
+        var path = "/db";
+        this.makeRequest("DELETE", path, null, null, null);
+    }
+
+    public RegisterResponse register(RegisterRequest registerRequest) throws ResponseException {
+        var path = "/user";
+        return this.makeRequest("POST", path, registerRequest, null, RegisterResponse.class);
+    }
+
+    public LoginResponse login(LoginRequest loginRequest) throws ResponseException {
+        var path = "/session";
+        return this.makeRequest("POST", path, loginRequest, null, LoginResponse.class);
+    }
+
+    public void logout(String authToken) throws ResponseException {
+        var path = "/session";
+        this.makeRequest("DELETE", path, null, authToken, null);
     }
 
     public Pet[] listPets() throws ResponseException {
         var path = "/pet";
         record listPetResponse(Pet[] pet) {
         }
-        var response = this.makeRequest("GET", path, null, listPetResponse.class);
+        var response = this.makeRequest("GET", path, null, null,  listPetResponse.class);
         return response.pet();
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, String header, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
+            // if an authToken header is given, adds it to header under Authorization
+            if (header != null){
+                http.setRequestProperty("Authorization", String.format("Bearer %s", header));
+            }
             http.setDoOutput(true);
 
             writeBody(request, http);

@@ -70,7 +70,6 @@ public class Server {
         return "";
     }
 
-
     // the auth token is in the headers under "Authorization"
     private Object handleRegister(Request req, Response res) throws ResponseException {
         RegisterRequest user = new Gson().fromJson(req.body(), RegisterRequest.class);
