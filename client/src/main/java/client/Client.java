@@ -22,7 +22,7 @@ public class Client {
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "login" -> signIn(params);
+                case "login" -> login(params);
                 case "register" -> register(params);
                 case "rescue" -> rescuePet(params);
                 case "list" -> listPets();

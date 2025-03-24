@@ -40,12 +40,19 @@ public class ServerFacade {
         this.makeRequest("DELETE", path, null, authToken, null);
     }
 
-    public Pet[] listPets() throws ResponseException {
-        var path = "/pet";
-        record listPetResponse(Pet[] pet) {
-        }
-        var response = this.makeRequest("GET", path, null, null,  listPetResponse.class);
-        return response.pet();
+    public ListGamesResponse listGames(String authToken) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("GET", path, null, authToken,  ListGamesResponse.class);
+    }
+
+    public CreateGameResponse createGame(CreateGameRequest createGameRequest, String authToken) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("POST", path, createGameRequest, authToken, CreateGameResponse.class);
+    }
+
+    public void joinGame(JoinGameRequest joinGameRequest, String authToken) throws ResponseException {
+        var path = "/game";
+        this.makeRequest("PUT", path, joinGameRequest, authToken, JoinGameRequest.class);
     }
 
     private <T> T makeRequest(String method, String path, Object request, String header, Class<T> responseClass) throws ResponseException {
