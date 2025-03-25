@@ -31,6 +31,7 @@ public class GameService {
     }
 
     public CreateGameResponse createGame(CreateGameRequest createGameRequest) throws ResponseException {
+        System.out.println("\nMade it!\n");
         AuthData auth = authDAO.getAuth(createGameRequest.authToken());
         if (auth == null) {
             throw new ResponseException(401, "Error: unauthorized");
