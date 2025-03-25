@@ -114,7 +114,7 @@ public class Client {
             server.joinGame(new JoinGameRequest(teamColor, Integer.parseInt(params[1]), authToken));
 
 
-            return String.format("%s joined the game!", visitorName);
+            return String.format("%s joined the game!\n", visitorName);
         }
         throw new ResponseException(400, "Invalid Join Game Input. Expected: play <white/black> <gameID>");
     }
