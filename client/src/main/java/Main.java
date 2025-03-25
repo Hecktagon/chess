@@ -1,7 +1,7 @@
 import chess.*;
 import client.Repl;
 import exception.ResponseException;
-
+// pointless
 public class Main {
     public static void main(String[] args) throws ResponseException {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
