@@ -3,7 +3,7 @@ package service;
 import dataaccess.MemoryAuth;
 import dataaccess.MemoryGame;
 import dataaccess.MemoryUser;
-import exception.exception.ResponseException;
+import exception.ResponseException;
 import org.junit.jupiter.api.*;
 import resreq.*;
 

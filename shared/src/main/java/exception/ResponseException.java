@@ -1,4 +1,4 @@
-package exception.exception;
+package exception;
 
 import com.google.gson.Gson;
 

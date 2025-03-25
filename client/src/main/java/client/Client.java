@@ -1,14 +1,10 @@
 package client;
 
-import java.lang.module.ResolutionException;
 import java.util.Arrays;
-import java.util.Vector;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import exception.*;
-import exception.exception.ResponseException;
-import model.GameData;
+import exception.ResponseException;
 import resreq.*;
 
 public class Client {

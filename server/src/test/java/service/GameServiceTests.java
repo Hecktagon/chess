@@ -4,7 +4,7 @@ import chess.ChessGame;
 import dataaccess.MemoryAuth;
 import dataaccess.MemoryGame;
 import dataaccess.MemoryUser;
-import exception.exception.ResponseException;
+import exception.ResponseException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

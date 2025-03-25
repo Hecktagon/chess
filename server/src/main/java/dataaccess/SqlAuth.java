@@ -1,6 +1,6 @@
 package dataaccess;
 
-import exception.exception.ResponseException;
+import exception.ResponseException;
 import model.AuthData;
 import java.sql.*;
 import static java.sql.Types.NULL;

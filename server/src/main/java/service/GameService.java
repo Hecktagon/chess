@@ -3,7 +3,7 @@ package service;
 import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
-import exception.exception.ResponseException;
+import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import resreq.*;

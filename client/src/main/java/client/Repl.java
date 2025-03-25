@@ -1,6 +1,6 @@
 package client;
 
-import exception.exception.ResponseException;
+import exception.ResponseException;
 
 import java.util.Objects;
 import java.util.Scanner;
