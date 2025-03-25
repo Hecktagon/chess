@@ -1,9 +1,12 @@
 package client;
 
 import java.util.Arrays;
+import java.util.Vector;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.*;
+import model.GameData;
 import resreq.*;
 
 public class Client {
@@ -29,7 +32,7 @@ public class Client {
                 case "register" -> clientRegister(params);
                 case "newgame" -> clientCreateGame(params);
                 case "listgames" -> clientListGames();
-                case "play" -> playGame(params);
+                case "play" -> clientJoinGame(params);
                 case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 default -> help();
@@ -97,6 +100,21 @@ public class Client {
             result.append(gson.toJson(game)).append('\n');
         }
         return result.toString();
+    }
+
+    public String clientJoinGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 2) {
+            ChessGame.TeamColor teamColor = (params[0].equalsIgnoreCase("WHITE")) ?
+                    ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            server.joinGame(new JoinGameRequest(teamColor, Integer.parseInt(params[1]), authToken));
+            return String.format("%s joined the game!", visitorName);
+        }
+        throw new ResponseException(400, "Invalid Join Game Input: Expected <play white||black gameID>");
+    }
+
+    public String observeGame(String... params) throws ResponseException {
+
     }
 }
 
