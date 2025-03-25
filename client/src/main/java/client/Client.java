@@ -12,6 +12,7 @@ import resreq.*;
 public class Client {
     private String visitorName = null;
     private String authToken = null;
+    private Integer currGameID = null;
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.SIGNEDOUT;
@@ -108,13 +109,18 @@ public class Client {
             ChessGame.TeamColor teamColor = (params[0].equalsIgnoreCase("WHITE")) ?
                     ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
             server.joinGame(new JoinGameRequest(teamColor, Integer.parseInt(params[1]), authToken));
+            currGameID = Integer.valueOf(params[1]);
             return String.format("%s joined the game!", visitorName);
         }
-        throw new ResponseException(400, "Invalid Join Game Input: Expected <play white||black gameID>");
+        throw new ResponseException(400, "Invalid Join Game Input: Expected <play white/black gameID>");
     }
 
     public String observeGame(String... params) throws ResponseException {
-
+        assertSignedIn();
+        if (params.length >= 1) {
+            currGameID = Integer.valueOf(params[0]);
+            return String.format("%s is observing gameID %s", visitorName, params[0]);
+        }
     }
 }
 
