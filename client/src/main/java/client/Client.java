@@ -2,6 +2,7 @@ package client;
 
 import java.util.Arrays;
 
+import com.google.gson.Gson;
 import exception.*;
 import resreq.*;
 
@@ -26,8 +27,8 @@ public class Client {
                 case "login" -> clientLogin(params);
                 case "logout" -> clientLogout();
                 case "register" -> clientRegister(params);
-                case "newgame" -> createGame(params);
-                case "listgames" -> listGames();
+                case "newgame" -> clientCreateGame(params);
+                case "listgames" -> clientListGames();
                 case "play" -> playGame(params);
                 case "observe" -> observeGame(params);
                 case "quit" -> "quit";
@@ -74,6 +75,28 @@ public class Client {
             return String.format("You registered as %s.", visitorName);
         }
         throw new ResponseException(400, "Invalid Register Input: Expected <register username password email>");
+    }
+
+    public String clientCreateGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 1) {
+            String gameName = params[0];
+            CreateGameRequest createGameRequest = new CreateGameRequest(authToken, gameName);
+            CreateGameResponse createGameResponse = server.createGame(createGameRequest);
+            return String.format("Created game %s with ID: %s", gameName, createGameResponse.gameID());
+        }
+        throw new ResponseException(400, "Invalid Create Game Input: Expected <newgame gamename>");
+    }
+
+    public String clientListGames() throws ResponseException {
+        assertSignedIn();
+        var games = server.listGames(authToken).games();
+        var result = new StringBuilder();
+        var gson = new Gson();
+        for (var game : games) {
+            result.append(gson.toJson(game)).append('\n');
+        }
+        return result.toString();
     }
 }
 

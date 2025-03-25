@@ -1,12 +1,13 @@
 package client;
 
 import java.util.Scanner;
+import static ui.EscapeSequences.*;
 
 public class Repl {
-    private final PetClient client;
+    private final Client client;
 
     public Repl(String serverUrl) {
-        client = new PetClient(serverUrl, this);
+        client = new Client(serverUrl);
     }
 
     public void run() {
@@ -21,13 +22,16 @@ public class Repl {
 
             try {
                 result = client.eval(line);
-                System.out.print(BLUE + result);
+                System.out.print(SET_TEXT_COLOR_MAGENTA + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
             }
         }
         System.out.println();
+    }
+    private void printPrompt() {
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_BLUE);
     }
 }
 
