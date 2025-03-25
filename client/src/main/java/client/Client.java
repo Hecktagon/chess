@@ -57,7 +57,7 @@ public class Client {
             visitorName = params[0];
             return String.format("You signed in as %s.", visitorName);
         }
-        throw new ResponseException(400, "Invalid Login Input: Expected <login username password>");
+        throw new ResponseException(400, "Invalid Login Input. Expected: login <username> <password>");
     }
 
     public String clientLogout() throws ResponseException {
@@ -78,7 +78,7 @@ public class Client {
             visitorName = params[0];
             return String.format("You registered as %s.", visitorName);
         }
-        throw new ResponseException(400, "Invalid Register Input: Expected <register username password email>");
+        throw new ResponseException(400, "Invalid Register Input. Expected: register <username> <password> <email>");
     }
 
     public String clientCreateGame(String... params) throws ResponseException {
@@ -89,7 +89,7 @@ public class Client {
             CreateGameResponse createGameResponse = server.createGame(createGameRequest);
             return String.format("Created game %s with ID: %s", gameName, createGameResponse.gameID());
         }
-        throw new ResponseException(400, "Invalid Create Game Input: Expected <newgame gamename>");
+        throw new ResponseException(400, "Invalid Create Game Input. Expected: newgame <gamename>");
     }
 
     public String clientListGames() throws ResponseException {
@@ -112,7 +112,7 @@ public class Client {
             currGameID = Integer.valueOf(params[1]);
             return String.format("%s joined the game!", visitorName);
         }
-        throw new ResponseException(400, "Invalid Join Game Input: Expected <play white/black gameID>");
+        throw new ResponseException(400, "Invalid Join Game Input. Expected: play <white/black> <gameID>");
     }
 
     public String observeGame(String... params) throws ResponseException {
@@ -121,7 +121,27 @@ public class Client {
             currGameID = Integer.valueOf(params[0]);
             return String.format("%s is observing gameID %s", visitorName, params[0]);
         }
+        throw new ResponseException(400, "Invalid Observe Game Input. Expected: observe <gameID>");
     }
+
+        public String help() {
+        if (state == State.SIGNEDOUT) {
+            return """
+                    - login <username> <password>
+                    - logout
+                    - quit
+                    """;
+        }
+        return """
+                - newgame <gamename>
+                - listgames
+                - play <white/black> <game ID>
+                - observe <game ID>
+                - logout
+                - quit
+                """;
+    }
+
 }
 
 
