@@ -104,11 +104,12 @@ public class DisplayChessBoard {
 
         if (color.equalsIgnoreCase("black")){
             stringBoard = flipBoard(stringBoard);
-            colLabels = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
-            rowLabels = new String[]{"8", "7", "6", "5", "4", "3", "2", "1"};
+            colLabels = new String[]{" h ", " g ", " f ", " e ", " d ", " c ", " b ", " a "};
+            rowLabels = new String[]{" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
         } else {
             colLabels = new String[]{" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
-            rowLabels = new String[]{" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
+            rowLabels = new String[]{" 8 ", " 7 ", " 6 ", " 5 ", " 4 ", " 3 ", " 2 ", " 1 "};
+
         }
         printHelper(stringBoard, rowLabels, colLabels);
     }

@@ -16,8 +16,8 @@ public class Repl {
     }
 
     public void run() throws ResponseException {
-        System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_BLUE + "Welcome to Chess! type 'help' for options." + RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT);
-        System.out.print(client.help());
+        System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_BLUE + "Welcome to Chess! type 'help' for options." );
+        System.out.print(client.help() + RESET_TEXT_COLOR + RESET_TEXT_BOLD_FAINT);
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -27,7 +27,7 @@ public class Repl {
 
             try {
                 result = client.eval(line);
-                System.out.print(SET_TEXT_COLOR_MAGENTA + result);
+                System.out.print(SET_TEXT_COLOR_BLUE + result);
                 String[] lineList = line.toLowerCase().split( " ");
                 if(Objects.equals(lineList[0], "play") && Objects.equals(lineList[1], "black")){
                     printGame(null, "black");
@@ -43,6 +43,6 @@ public class Repl {
         System.out.println();
     }
     private void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_BLUE);
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> ");
     }
 }
