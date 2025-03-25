@@ -71,9 +71,9 @@ public class ServerFacade {
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (ResponseException ex) {
-            throw ex;
+            throw new ResponseException(500, "Make Request Response Error 500: " + ex.getMessage());
         } catch (Exception ex) {
-            throw new ResponseException(500, ex.getMessage());
+            throw new ResponseException(501, "Make Request Non-Response Error 501: " + ex.getMessage());
         }
     }
 
@@ -93,6 +93,7 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             try (InputStream respErr = http.getErrorStream()) {
                 if (respErr != null) {
+                    System.out.println(respErr);
                     throw ResponseException.fromJson(respErr);
                 }
             }

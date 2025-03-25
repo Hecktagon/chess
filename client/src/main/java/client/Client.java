@@ -119,7 +119,7 @@ public class Client {
             try {
                 server.joinGame(new JoinGameRequest(teamColor, Integer.parseInt(params[1]), authToken));
             } catch (ResponseException error){
-                throw new ResponseException(402, "Unauthorized: " + params[0] + " is already taken in this game.");
+                throw new ResponseException(402, "Unauthorized: " + error.getMessage());
             }
 
             return String.format("%s joined the game!\n", visitorName);
