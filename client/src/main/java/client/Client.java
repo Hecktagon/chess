@@ -3,6 +3,7 @@ package client;
 import java.util.Arrays;
 
 import exception.*;
+import resreq.*;
 
 public class Client {
     private String visitorName = null;
@@ -18,23 +19,34 @@ public class Client {
 
     public String eval(String input) {
         try {
-            var tokens = input.toLowerCase().split(" ");
-            var cmd = (tokens.length > 0) ? tokens[0] : "help";
+            var tokens = input.split(" ");
+            var cmd = (tokens.length > 0) ? tokens[0].toLowerCase() : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "login" -> login(params);
+                case "login" -> clientLogin(params);
+                case "logout" -> clientLogout();
                 case "register" -> register(params);
-                case "rescue" -> rescuePet(params);
-                case "list" -> listPets();
-                case "logout" -> signOut();
-                case "adopt" -> adoptPet(params);
-                case "adoptall" -> adoptAllPets();
+                case "newgame" -> createGame(params);
+                case "listgames" -> listGames();
+                case "play" -> playGame(params);
+                case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 default -> help();
             };
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
+    }
+
+    public String clientLogin(String... params) throws ResponseException {
+        if (params.length >= 1) {
+            LoginResponse loginResponse = server.login(new LoginRequest(params[0], params[1]));
+            state = State.SIGNEDIN;
+            authToken = loginResponse.authToken();
+            visitorName = params[0];
+            return String.format("You signed in as %s.", visitorName);
+        }
+        throw new ResponseException(400, "Invalid Login Input: Expected <login username password>");
     }
 }
 
