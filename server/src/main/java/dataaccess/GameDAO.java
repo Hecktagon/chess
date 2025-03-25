@@ -1,9 +1,8 @@
 package dataaccess;
 
-import chess.ChessGame;
+import exception.exception.ResponseException;
 import model.GameData;
 import java.util.Collection;
-import exception.*;
 
 public interface GameDAO {
     GameData createGame(String gameName) throws ResponseException;

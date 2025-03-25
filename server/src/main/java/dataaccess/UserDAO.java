@@ -1,8 +1,7 @@
 package dataaccess;
 
+import exception.exception.ResponseException;
 import model.UserData;
-import exception.*;
-import java.util.Collection;
 
 public interface UserDAO {
     UserData createUser(UserData user) throws ResponseException;

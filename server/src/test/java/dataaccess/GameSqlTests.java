@@ -1,10 +1,8 @@
 package dataaccess;
 
-import chess.ChessGame;
-import exception.ResponseException;
+import exception.exception.ResponseException;
 import model.GameData;
 import org.junit.jupiter.api.*;
-import resreq.*;
 
 import java.util.Collection;
 

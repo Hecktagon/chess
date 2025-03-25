@@ -5,7 +5,7 @@ import service.GameService;
 import service.UserService;
 import spark.*;
 import com.google.gson.Gson;
-import exception.ResponseException;
+import exception.exception.ResponseException;
 import service.ClearService;
 import resreq.*;
 import java.util.Map;

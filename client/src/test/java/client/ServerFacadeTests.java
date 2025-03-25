@@ -1,7 +1,7 @@
 package client;
 
 import chess.ChessGame;
-import exception.*;
+import exception.exception.ResponseException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

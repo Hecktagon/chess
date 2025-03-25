@@ -1,10 +1,8 @@
 package dataaccess;
 
 import model.UserData;
-import service.*;
-import exception.ResponseException;
+import exception.exception.ResponseException;
 import org.junit.jupiter.api.*;
-import resreq.*;
 
 public class UserSqlTests {
 

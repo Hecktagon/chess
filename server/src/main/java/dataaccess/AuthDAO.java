@@ -1,8 +1,7 @@
 package dataaccess;
 
+import exception.exception.ResponseException;
 import model.AuthData;
-import exception.*;
-import java.util.Collection;
 
 public interface AuthDAO {
     AuthData createAuth(AuthData auth) throws ResponseException;

@@ -1,6 +1,6 @@
 import chess.*;
 import client.Repl;
-import exception.ResponseException;
+import exception.exception.ResponseException;
 // pointless
 public class Main {
     public static void main(String[] args) throws ResponseException {

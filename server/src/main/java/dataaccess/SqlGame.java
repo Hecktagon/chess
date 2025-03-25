@@ -1,10 +1,8 @@
 package dataaccess;
 
-import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
-import exception.ResponseException;
-import model.AuthData;
+import exception.exception.ResponseException;
 import model.GameData;
 
 import java.util.ArrayList;

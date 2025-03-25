@@ -7,6 +7,7 @@ import java.util.Vector;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.*;
+import exception.exception.ResponseException;
 import model.GameData;
 import resreq.*;
 
@@ -23,7 +24,7 @@ public class Client {
         this.serverUrl = serverUrl;
     }
 
-    public String eval(String input) throws ResponseException{
+    public String eval(String input) throws ResponseException {
         try {
             var tokens = input.split(" ");
             var cmd = (tokens.length > 0) ? tokens[0].toLowerCase() : "help";

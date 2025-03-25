@@ -1,8 +1,7 @@
 package client;
 
-import exception.ResponseException;
+import exception.exception.ResponseException;
 
-import java.lang.module.ResolutionException;
 import java.util.Objects;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;

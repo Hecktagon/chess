@@ -1,13 +1,14 @@
 package dataaccess;
 
+import exception.exception.ResponseException;
 import model.AuthData;
-import exception.*;
+
 import java.util.HashMap;
 
 public class MemoryAuth implements AuthDAO{
     private final HashMap<String, AuthData> auths = new HashMap<>();
 
-    public AuthData createAuth(AuthData auth) throws ResponseException{
+    public AuthData createAuth(AuthData auth) throws ResponseException {
         auths.put(auth.authToken(), auth);
         return auth;
     }

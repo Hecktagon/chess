@@ -1,8 +1,8 @@
 package dataaccess;
 
 import chess.ChessGame;
+import exception.exception.ResponseException;
 import model.GameData;
-import exception.*;
 
 import java.util.*;
 
@@ -10,7 +10,7 @@ public class MemoryGame implements GameDAO{
 
     private final HashMap<Integer, GameData> games = new HashMap<>();
 
-    public GameData createGame(String gameName) throws ResponseException{
+    public GameData createGame(String gameName) throws ResponseException {
         int gameID = games.size();
         GameData game = new GameData(null, null, gameID, gameName, new ChessGame());
         games.put(gameID, game);
