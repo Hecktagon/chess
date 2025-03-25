@@ -1,5 +1,6 @@
 package client;
 
+import java.lang.module.ResolutionException;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -22,25 +23,21 @@ public class Client {
         this.serverUrl = serverUrl;
     }
 
-    public String eval(String input) {
-        try {
-            var tokens = input.split(" ");
-            var cmd = (tokens.length > 0) ? tokens[0].toLowerCase() : "help";
-            var params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "login" -> clientLogin(params);
-                case "logout" -> clientLogout();
-                case "register" -> clientRegister(params);
-                case "newgame" -> clientCreateGame(params);
-                case "listgames" -> clientListGames();
-                case "play" -> clientJoinGame(params);
-                case "observe" -> observeGame(params);
-                case "quit" -> "quit";
-                default -> help();
-            };
-        } catch (ResponseException ex) {
-            return ex.getMessage();
-        }
+    public String eval(String input) throws ResponseException{
+        var tokens = input.split(" ");
+        var cmd = (tokens.length > 0) ? tokens[0].toLowerCase() : "help";
+        var params = Arrays.copyOfRange(tokens, 1, tokens.length);
+        return switch (cmd) {
+            case "login" -> clientLogin(params);
+            case "logout" -> clientLogout();
+            case "register" -> clientRegister(params);
+            case "newgame" -> clientCreateGame(params);
+            case "listgames" -> clientListGames();
+            case "play" -> clientJoinGame(params);
+            case "observe" -> observeGame(params);
+            case "quit" -> "quit";
+            default -> help();
+        };
     }
 
     private void assertSignedIn() throws ResponseException {
@@ -108,8 +105,15 @@ public class Client {
         if (params.length >= 2) {
             ChessGame.TeamColor teamColor = (params[0].equalsIgnoreCase("WHITE")) ?
                     ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            try {
+                currGameID = Integer.valueOf(params[1]);
+            } catch (Throwable error) {
+                String msg = error.toString();
+                throw new ResponseException(401, "Invalid Join Game Input. Expected: play <white/black> <gameID>\n" + msg);
+            }
             server.joinGame(new JoinGameRequest(teamColor, Integer.parseInt(params[1]), authToken));
-            currGameID = Integer.valueOf(params[1]);
+
+
             return String.format("%s joined the game!", visitorName);
         }
         throw new ResponseException(400, "Invalid Join Game Input. Expected: play <white/black> <gameID>");
@@ -118,7 +122,12 @@ public class Client {
     public String observeGame(String... params) throws ResponseException {
         assertSignedIn();
         if (params.length >= 1) {
-            currGameID = Integer.valueOf(params[0]);
+            try {
+                currGameID = Integer.valueOf(params[1]);
+            } catch (Throwable error) {
+                String msg = error.toString();
+                throw new ResponseException(401, "Invalid Observe Game Input. Expected: play <gameID>\n" + msg);
+            }
             return String.format("%s is observing gameID %s", visitorName, params[0]);
         }
         throw new ResponseException(400, "Invalid Observe Game Input. Expected: observe <gameID>");
@@ -127,8 +136,8 @@ public class Client {
         public String help() {
         if (state == State.SIGNEDOUT) {
             return """
+                    - register <username> <password> <email>
                     - login <username> <password>
-                    - logout
                     - quit
                     """;
         }
