@@ -83,8 +83,8 @@ public class DisplayChessBoard {
             System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
             if (rowIndex == 7) {
                 System.out.print(SET_BG_COLOR_BLACK + EMPTY + SET_TEXT_COLOR_WHITE);
-                for (String colLabel : colLabels){
-                    System.out.print(colLabel);
+                for (String colTitle : colLabels){
+                    System.out.print(colTitle);
                 }
                 System.out.print(EMPTY + RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
             }
@@ -104,7 +104,7 @@ public class DisplayChessBoard {
 
         if (color.equalsIgnoreCase("black")){
             stringBoard = flipBoard(stringBoard);
-            colLabels = new String[]{" h ", " g ", " f ", " e ", " d ", " c ", " b ", " a "};
+            colLabels = new String[]{" h ", " g ", " f ", " e ", " d ", " c ", " b ", " a "};
             rowLabels = new String[]{" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 "};
         } else {
             colLabels = new String[]{" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};

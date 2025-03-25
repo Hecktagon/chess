@@ -21,7 +21,7 @@ public class SqlUser implements UserDAO{
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
         String hashedPass = (user.password() == null) ? null :  passHasher(user.password());
         try {
-            executeUpdate(statement, user.username(), hashedPass, user.email());
+            executeUserUpdate(statement, user.username(), hashedPass, user.email());
         } catch (Exception e) {
             throw new ResponseException(400, "Error: bad request, invalid username, password, or email\n" + e.getMessage());
         }
@@ -47,7 +47,7 @@ public class SqlUser implements UserDAO{
 
     public void clearUsers() throws ResponseException{
         var statement = "TRUNCATE user";
-        executeUpdate(statement);
+        executeUserUpdate(statement);
     }
 
     private UserData readUser(ResultSet rs) throws SQLException {
@@ -68,9 +68,9 @@ public class SqlUser implements UserDAO{
             """
     };
 
-    private void executeUpdate(String statement, Object... params) throws ResponseException {
+    private void executeUserUpdate(String userStatement, Object... params) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement(statement)) {
+            try (var ps = conn.prepareStatement(userStatement)) {
                 for (var i = 0; i < params.length; i++) {
                     var param = params[i];
                     if (param instanceof String p) {ps.setString(i + 1, p);}
@@ -79,7 +79,7 @@ public class SqlUser implements UserDAO{
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
+            throw new ResponseException(500, String.format("unable to update user database: %s, %s", userStatement, e.getMessage()));
         }
     }
 

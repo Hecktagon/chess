@@ -73,7 +73,7 @@ public class SqlAuth implements AuthDAO{
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()));
+            throw new ResponseException(500, String.format("unable to update auth database: %s, %s", statement, e.getMessage()));
         }
     }
 
