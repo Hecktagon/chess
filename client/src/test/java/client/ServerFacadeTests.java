@@ -14,18 +14,22 @@ public class ServerFacadeTests {
 
     private static Server server;
     private static ServerFacade serverFacade;
+    private String workingAuth;
 
 
     @BeforeAll
-    public static void init() {
+    public static void init() throws ResponseException {
         server = new Server();
         var port = server.run(8080);
+        String workingAuth = null;
         serverFacade = new ServerFacade("http://localhost:" + port);
+        serverFacade.clearAll();
         System.out.println("Started test HTTP server on " + port);
     }
 
     @AfterAll
-    static void stopServer() {
+    static void stopServer() throws ResponseException {
+        serverFacade.clearAll();
         server.stop();
     }
 
@@ -37,6 +41,7 @@ public class ServerFacadeTests {
             RegisterResponse response = serverFacade.register(request);
             assertNotNull(response);
             assertEquals("username", response.username());
+            workingAuth = response.authToken();
         });
     }
 
@@ -52,7 +57,7 @@ public class ServerFacadeTests {
         assertDoesNotThrow(() -> {
             LoginResponse response = serverFacade.login(request);
             assertNotNull(response);
-            assertEquals("authToken", response.authToken());
+            workingAuth = response.authToken();
         });
     }
 
@@ -64,8 +69,7 @@ public class ServerFacadeTests {
 
     @Test
     public void testLogoutPositive() {
-        String authToken = "validAuthToken";
-        assertDoesNotThrow(() -> serverFacade.logout(authToken));
+        assertDoesNotThrow(() -> serverFacade.logout(workingAuth));
     }
 
     @Test
@@ -76,9 +80,14 @@ public class ServerFacadeTests {
 
     @Test
     public void testListGamesPositive() {
-        String authToken = "validAuthToken"; // Mock valid token
+        LoginRequest request = new LoginRequest("username", "password");
         assertDoesNotThrow(() -> {
-            ListGamesResponse response = serverFacade.listGames(authToken);
+            LoginResponse response = serverFacade.login(request);
+            assertNotNull(response);
+            workingAuth = response.authToken();
+        });
+        assertDoesNotThrow(() -> {
+            ListGamesResponse response = serverFacade.listGames(workingAuth);
             assertNotNull(response);
             assertFalse(response.games().isEmpty());
         });
@@ -92,7 +101,7 @@ public class ServerFacadeTests {
 
     @Test
     public void testCreateGamePositive() {
-        CreateGameRequest request = new CreateGameRequest("validAuthToken", "gameName");
+        CreateGameRequest request = new CreateGameRequest(workingAuth, "gameName");
         assertDoesNotThrow(() -> {
             CreateGameResponse response = serverFacade.createGame(request);
             assertNotNull(response);
@@ -107,13 +116,13 @@ public class ServerFacadeTests {
 
     @Test
     public void testJoinGamePositive() {
-        JoinGameRequest request = new JoinGameRequest(ChessGame.TeamColor.BLACK, 1, "validAuthToken");
+        JoinGameRequest request = new JoinGameRequest(ChessGame.TeamColor.BLACK, 1, workingAuth);
         assertDoesNotThrow(() -> serverFacade.joinGame(request));
     }
 
     @Test
     public void testJoinGameNegative() {
-        JoinGameRequest invalidRequest = new JoinGameRequest(ChessGame.TeamColor.BLACK, 197992, "validAuthToken");
+        JoinGameRequest invalidRequest = new JoinGameRequest(ChessGame.TeamColor.BLACK, 197992, workingAuth);
         assertThrows(ResponseException.class, () -> serverFacade.joinGame(invalidRequest));
     }
 }
