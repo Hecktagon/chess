@@ -25,7 +25,7 @@ public class Client {
             return switch (cmd) {
                 case "login" -> clientLogin(params);
                 case "logout" -> clientLogout();
-                case "register" -> register(params);
+                case "register" -> clientRegister(params);
                 case "newgame" -> createGame(params);
                 case "listgames" -> listGames();
                 case "play" -> playGame(params);
@@ -59,14 +59,21 @@ public class Client {
         assertSignedIn();
         server.logout(authToken);
         state = State.SIGNEDOUT;
-        return String.format("%s left the shop", visitorName);
+        authToken = null;
+        String consoleResponse = String.format("%s left the shop", visitorName);
+        visitorName = null;
+        return consoleResponse;
     }
 
     public String clientRegister(String... params) throws ResponseException {
         if (params.length >= 3) {
-
+            RegisterResponse registerResponse = server.register(new RegisterRequest(params[0], params[1], params[2]));
+            state = State.SIGNEDIN;
+            authToken = registerResponse.authToken();
+            visitorName = params[0];
+            return String.format("You registered as %s.", visitorName);
         }
-        throw new ResponseException(400, "Invalid Login Input: Expected <login username password>")
+        throw new ResponseException(400, "Invalid Register Input: Expected <register username password email>");
     }
 }
 
