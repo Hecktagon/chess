@@ -71,9 +71,9 @@ public class ServerFacade {
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (ResponseException ex) {
-            throw new ResponseException(500, "Make Request Response Error 500: " + ex.getMessage());
+            throw ex;
         } catch (Exception ex) {
-            throw new ResponseException(501, "Make Request Non-Response Error 501: " + ex.getMessage());
+            throw new ResponseException(500, ex.getMessage());
         }
     }
 
@@ -92,12 +92,12 @@ public class ServerFacade {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
             try (InputStream respErr = http.getErrorStream()) {
-                if (respErr != null) {
-                    System.out.println(respErr);
-                    throw ResponseException.fromJson(respErr);
+                InputStreamReader reader = new InputStreamReader(respErr);
+                if (respErr != null && reader != null) {
+                    ErrMessage errMessage = new Gson().fromJson(reader, ErrMessage.class);
+                    throw new ResponseException(status, errMessage.message());
                 }
             }
-
             throw new ResponseException(status, "other failure: " + status);
         }
     }

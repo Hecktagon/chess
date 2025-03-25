@@ -10,7 +10,7 @@ import static ui.DisplayChessBoard.*;
 public class Repl {
     private final Client client;
 
-    public Repl(String serverUrl) {
+    public Repl(String serverUrl) throws ResponseException {
         client = new Client(Objects.requireNonNullElse(serverUrl, "http://localhost:8080"));
     }
 

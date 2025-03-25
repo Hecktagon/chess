@@ -1,6 +1,7 @@
 package client;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
@@ -8,14 +9,14 @@ import exception.ResponseException;
 import resreq.*;
 
 public class Client {
+    private HashMap<Integer, Integer> gameList = new HashMap<>();
     private String visitorName = null;
     private String authToken = null;
-    private Integer currGameID = null;
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.SIGNEDOUT;
 
-    public Client(String serverUrl) {
+    public Client(String serverUrl) throws ResponseException{
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
     }
@@ -49,14 +50,15 @@ public class Client {
     }
 
     public String clientLogin(String... params) throws ResponseException {
-        if (params.length >= 2) {
+        if (params.length == 2) {
             LoginResponse loginResponse = server.login(new LoginRequest(params[0], params[1]));
             state = State.SIGNEDIN;
             authToken = loginResponse.authToken();
             visitorName = params[0];
+            clientListGames();
             return String.format("You signed in as %s.", visitorName);
         }
-        throw new ResponseException(400, "Invalid Login Input. Expected: login <username> <password>");
+        throw new ResponseException(400, "Invalid Login Input. Try: login <username> <password>");
     }
 
     public String clientLogout() throws ResponseException {
@@ -64,89 +66,115 @@ public class Client {
         server.logout(authToken);
         state = State.SIGNEDOUT;
         authToken = null;
-        String consoleResponse = String.format("%s left the shop", visitorName);
+        String consoleResponse = String.format("%s logged off.", visitorName);
         visitorName = null;
+        gameList = null;
         return consoleResponse;
     }
 
     public String clientRegister(String... params) throws ResponseException {
-        if (params.length >= 3) {
+        if (params.length == 3) {
             RegisterResponse registerResponse = server.register(new RegisterRequest(params[0], params[1], params[2]));
             state = State.SIGNEDIN;
             authToken = registerResponse.authToken();
             visitorName = params[0];
+            clientListGames();
             return String.format("You registered as %s.", visitorName);
         }
-        throw new ResponseException(400, "Invalid Register Input. Expected: register <username> <password> <email>");
+        throw new ResponseException(400, "Invalid Register Input. Try: register <username> <password> <email>");
     }
 
     public String clientCreateGame(String... params) throws ResponseException {
         assertSignedIn();
-        if (params.length >= 1) {
+        if (params.length == 1) {
             String gameName = params[0];
             CreateGameRequest createGameRequest = new CreateGameRequest(authToken, gameName);
             CreateGameResponse createGameResponse = server.createGame(createGameRequest);
-            return String.format("Created game %s with ID: %s", gameName, createGameResponse.gameID());
+            gameList.put(gameList.size() + 1, createGameResponse.gameID());
+            return String.format("Created game %s", gameName);
         }
-        throw new ResponseException(400, "Invalid Create Game Input. Expected: newgame <gamename>");
+        throw new ResponseException(400, "Invalid Create Game Input. Try: newgame <gamename>");
     }
 
     public String clientListGames() throws ResponseException {
         assertSignedIn();
-        var games = server.listGames(authToken).games();
+        ListGamesResponse listGamesResponse = server.listGames(authToken);
+        var games = listGamesResponse.games();
         var result = new StringBuilder();
         var gson = new Gson();
+        gameList = new HashMap<>();
+        Integer clientGameNum = 1;
         for (var game : games) {
-            result.append(gson.toJson(game)).append('\n');
+            String whiteUsername = (game.whiteUsername() == null) ? " " : game.whiteUsername();
+            String blackUsername = (game.blackUsername() == null) ? " " : game.blackUsername();
+            String clientGameData = String.format("%s)   Name: %s    White: %s   Black: %s\n",
+                    clientGameNum, game.gameName(), whiteUsername, blackUsername);
+            result.append(clientGameData);
+            gameList.put(clientGameNum, game.gameID());
+            clientGameNum++;
         }
+//        System.out.println("\nGAMELIST: \n" + gameList);
         return result.toString();
     }
 
     public String clientJoinGame(String... params) throws ResponseException {
         assertSignedIn();
-        if (params.length >= 2) {
-            ChessGame.TeamColor teamColor = (params[0].equalsIgnoreCase("WHITE")) ?
-                    ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-            try {
-                currGameID = Integer.valueOf(params[1]);
-            } catch (Throwable error) {
-                String msg = error.toString();
-                throw new ResponseException(401, "Invalid Join Game Input. Expected: play <white/black> <gameID>\n" + msg);
+        if (params.length == 2) {
+            ChessGame.TeamColor teamColor;
+            try{
+                Integer.parseInt(params[1]);
+            } catch (NumberFormatException e) {
+                throw new ResponseException(400,
+                        String.format("%s is not a valid gameID, gameID must be numeric. Try: play <white/black> <gameID>", params[1]));
+            }
+            if (params[0].equalsIgnoreCase("WHITE")){
+                teamColor = ChessGame.TeamColor.WHITE;
+            } else if (params[0].equalsIgnoreCase("BLACK")) {
+                teamColor = ChessGame.TeamColor.BLACK;
+            } else {
+                throw new ResponseException(400,
+                        String.format("%s is not a valid team color. Try: play <white/black> <gameID>", params[0]));
             }
             try {
-                server.joinGame(new JoinGameRequest(teamColor, Integer.parseInt(params[1]), authToken));
+                Integer actualGameID = gameList.get(Integer.parseInt(params[1]));
+                server.joinGame(new JoinGameRequest(teamColor, actualGameID, authToken));
             } catch (ResponseException error){
                 throw new ResponseException(402, "Unauthorized: " + error.getMessage());
             }
 
             return String.format("%s joined the game!\n", visitorName);
         }
-        throw new ResponseException(400, "Invalid Join Game Input. Expected: play <white/black> <gameID>");
+        throw new ResponseException(400, "Invalid Join Game Input. Try: play <white/black> <gameID>");
     }
 
     public String observeGame(String... params) throws ResponseException {
         assertSignedIn();
-        if (params.length >= 1) {
+        if (params.length == 1) {
             try {
-                currGameID = Integer.valueOf(params[1]);
-            } catch (Throwable error) {
-                String msg = error.toString();
-                throw new ResponseException(401, "Invalid Observe Game Input. Expected: play <gameID>\n" + msg);
+                if (!gameList.containsKey(Integer.parseInt(params[0]))){
+                    throw new ResponseException(401,
+                            "No such game.");
+                }
+            } catch (NumberFormatException e) {
+                throw new ResponseException(401,
+                        "Invalid Observe Game Input, gameID must be numeric. Try: observe <gameID>");
             }
-            return String.format("%s is observing gameID %s", visitorName, params[0]);
+            return String.format("%s is observing the game", visitorName);
         }
-        throw new ResponseException(400, "Invalid Observe Game Input. Expected: observe <gameID>");
+        throw new ResponseException(400, "Invalid Observe Game Input. Try: observe <gameID>");
     }
 
         public String help() {
         if (state == State.SIGNEDOUT) {
             return """
+                    - help
                     - register <username> <password> <email>
                     - login <username> <password>
                     - quit
                     """;
         }
         return """
+                - help
                 - newgame <gamename>
                 - listgames
                 - play <white/black> <game ID>

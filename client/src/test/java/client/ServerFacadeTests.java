@@ -149,6 +149,5 @@ public class ServerFacadeTests {
             serverFacade.clearAll();
             serverFacade.register(reg);
         });
-
     }
 }

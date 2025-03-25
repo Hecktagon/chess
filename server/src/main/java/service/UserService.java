@@ -35,7 +35,7 @@ public class UserService {
             userData = userDAO.createUser(userData);
             if (userData.username() == null || userData.password() == null || userData.email() == null ||
             userData.username().isEmpty() || userData.password().isEmpty() || userData.email().isEmpty()){
-                throw new ResponseException(400, "Error: bad request");
+                throw new ResponseException(400, "Error: bad request, missing register info");
             }
 
             UUID uuid = UUID.randomUUID();
@@ -52,7 +52,7 @@ public class UserService {
          if(userData != null){
              if (!Objects.equals(userData.password(), loginRequest.password()) &&
                      !BCrypt.checkpw(loginRequest.password(), userData.password())){
-                 throw new ResponseException(401, "Error: unauthorized");
+                 throw new ResponseException(401, "Error: incorrect password");
              }
              String uuid = UUID.randomUUID().toString();
              authDAO.createAuth(new AuthData(uuid, loginRequest.username()));
@@ -67,6 +67,6 @@ public class UserService {
             authDAO.deleteAuth(auth.authToken());
             return new EmptyResponse();
         }
-        throw new ResponseException(401, "Error: unauthorized");
+        throw new ResponseException(401, "Error: logout failed, unauthorized");
     }
 }
