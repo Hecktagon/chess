@@ -62,7 +62,7 @@ public class ServerFacade {
             http.setRequestMethod(method);
             // if an authToken header is given, adds it to header under Authorization
             if (header != null){
-                http.setRequestProperty("Authorization", String.format("Bearer %s", header));
+                http.setRequestProperty("Authorization", header);
             }
             http.setDoOutput(true);
 

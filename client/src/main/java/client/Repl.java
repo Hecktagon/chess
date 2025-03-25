@@ -24,14 +24,13 @@ public class Repl {
             printPrompt();
             String line = scanner.nextLine();
 
-//            try {
+            try {
                 result = client.eval(line);
                 System.out.print(SET_TEXT_COLOR_MAGENTA + result);
-//            } catch (Throwable e) {
-//                var msg = e.toString();
-//                System.out.println(SET_TEXT_COLOR_RED  + "Eval Failed");
-//                System.out.print(msg);
-//            }
+            } catch (Throwable e) {
+                var msg = e.getMessage();
+                System.out.print(SET_TEXT_COLOR_RED + msg);
+            }
         }
         System.out.println();
     }
