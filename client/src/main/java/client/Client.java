@@ -38,8 +38,14 @@ public class Client {
         }
     }
 
+    private void assertSignedIn() throws ResponseException {
+        if (state == State.SIGNEDOUT) {
+            throw new ResponseException(400, "You must sign in");
+        }
+    }
+
     public String clientLogin(String... params) throws ResponseException {
-        if (params.length >= 1) {
+        if (params.length >= 2) {
             LoginResponse loginResponse = server.login(new LoginRequest(params[0], params[1]));
             state = State.SIGNEDIN;
             authToken = loginResponse.authToken();
@@ -47,6 +53,20 @@ public class Client {
             return String.format("You signed in as %s.", visitorName);
         }
         throw new ResponseException(400, "Invalid Login Input: Expected <login username password>");
+    }
+
+    public String clientLogout() throws ResponseException {
+        assertSignedIn();
+        server.logout(authToken);
+        state = State.SIGNEDOUT;
+        return String.format("%s left the shop", visitorName);
+    }
+
+    public String clientRegister(String... params) throws ResponseException {
+        if (params.length >= 3) {
+
+        }
+        throw new ResponseException(400, "Invalid Login Input: Expected <login username password>")
     }
 }
 
