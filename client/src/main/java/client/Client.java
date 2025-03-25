@@ -24,25 +24,30 @@ public class Client {
     }
 
     public String eval(String input) throws ResponseException{
-        var tokens = input.split(" ");
-        var cmd = (tokens.length > 0) ? tokens[0].toLowerCase() : "help";
-        var params = Arrays.copyOfRange(tokens, 1, tokens.length);
-        return switch (cmd) {
-            case "login" -> clientLogin(params);
-            case "logout" -> clientLogout();
-            case "register" -> clientRegister(params);
-            case "newgame" -> clientCreateGame(params);
-            case "listgames" -> clientListGames();
-            case "play" -> clientJoinGame(params);
-            case "observe" -> observeGame(params);
-            case "quit" -> "quit";
-            default -> help();
-        };
+        try {
+            var tokens = input.split(" ");
+            var cmd = (tokens.length > 0) ? tokens[0].toLowerCase() : "help";
+            var params = Arrays.copyOfRange(tokens, 1, tokens.length);
+
+            return switch (cmd) {
+                case "login" -> clientLogin(params);
+                case "logout" -> clientLogout();
+                case "register" -> clientRegister(params);
+                case "newgame" -> clientCreateGame(params);
+                case "listgames" -> clientListGames();
+                case "play" -> clientJoinGame(params);
+                case "observe" -> observeGame(params);
+                case "quit" -> "quit";
+                default -> help();
+            };
+        } catch (ResponseException ex) {
+            throw new ResponseException(400, ex.getMessage());
+        }
     }
 
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {
-            throw new ResponseException(400, "You must sign in");
+            throw new ResponseException(400, "Unauthorized: You must sign in");
         }
     }
 
@@ -111,8 +116,11 @@ public class Client {
                 String msg = error.toString();
                 throw new ResponseException(401, "Invalid Join Game Input. Expected: play <white/black> <gameID>\n" + msg);
             }
-            server.joinGame(new JoinGameRequest(teamColor, Integer.parseInt(params[1]), authToken));
-
+            try {
+                server.joinGame(new JoinGameRequest(teamColor, Integer.parseInt(params[1]), authToken));
+            } catch (ResponseException error){
+                throw new ResponseException(402, "Unauthorized: " + params[0] + " is already taken in this game.");
+            }
 
             return String.format("%s joined the game!\n", visitorName);
         }

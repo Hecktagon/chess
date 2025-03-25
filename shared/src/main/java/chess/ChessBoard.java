@@ -130,8 +130,8 @@ public class ChessBoard {
         board[7][6] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
         board[7][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
 
-        System.out.print("\nBoard Reset:\n");
-        printBoard();
+//        System.out.print("\nBoard Reset:\n");
+//        printBoard();
     }
 
     @Override

@@ -213,7 +213,7 @@ public class ChessGame {
                     myBoard.addPiece(end, new ChessPiece(myPiece.getTeamColor(), move.getPromotionPiece()));
                 }
                 System.out.printf("\n%s Moved:\n", myPiece);
-                myBoard.printBoard();
+//                myBoard.printBoard();
                 myPiece.moved();
                 if (mostRecent != null) {
                     mostRecent.setJustMoved(false);
@@ -349,7 +349,7 @@ public class ChessGame {
                 myBoard.addPiece(curPos, curPiece);
             }
         }
-        System.out.print("\nBoard Set\n");
+//        System.out.print("\nBoard Set\n");
         board.printBoard();
     }
 
