@@ -1,6 +1,8 @@
 package client.websocket;
 
 // extends endpoint and implements some interface
+// Not sure what "endpoint" is, is it Server? Also, what interface does this implement?
+
 public class WebSocketFacade{
     //    Session session;
     //    GameHandler gameHandler;
@@ -25,7 +27,7 @@ public class WebSocketFacade{
     //        1. create command message
     //        2. send message to server
 
-    //    process incoming messages:
+    // PROCESS INCOMING MESSAGES:
     //    onMessage(message)
     //        1. deserialize message
     //        2. call GameHandler to process message
