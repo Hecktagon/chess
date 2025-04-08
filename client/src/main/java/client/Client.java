@@ -141,7 +141,7 @@ public class Client {
             } catch (ResponseException error){
                 throw new ResponseException(402, "Unauthorized: " + error.getMessage());
             }
-
+            // websocket 
             return String.format("%s joined the game!\n", visitorName);
         }
         throw new ResponseException(400, "Invalid Join Game Input. Try: play <white/black> <gameID>");

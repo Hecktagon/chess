@@ -8,6 +8,8 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import service.ClearService;
 import resreq.*;
+import websocket.WebSocketHandler;
+
 import java.util.Map;
 
 
@@ -42,6 +44,9 @@ public class Server {
         gameService = new GameService(authDAO, gameDAO);
 
         Spark.staticFiles.location("web");
+
+        // WebSocket Endpoint here
+        Spark.webSocket("/ws", WebSocketHandler);
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::handleClearAll);

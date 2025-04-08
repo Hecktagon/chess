@@ -1,23 +1,54 @@
 package websocket;
 
+import exception.ResponseException;
+import java.io.IOException;
+import com.google.gson.Gson;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import websocket.commands.UserGameCommand;
+import websocket.messages.*;
+
+@WebSocket
 public class WebSocketHandler {
-    //    WebSocketSessions sessions;
+        WebSocketSessions sessions;
 
-    //    @onWebSocketError
-    //    void onError(Throwable throwable);
+        @OnWebSocketError
+        void onError(Throwable throwable){
 
-    //    @onWebSocketMessage
-    //    void onMessage(session, string)
-        //    1. Determine message type
-        //    2. call one of the below methods to process the message
+        }
 
-    //    func connect(message)
-    //    func makeMove(message)
-    //    func leaveGame(message)
-    //    func resignGame(message)
+        @OnWebSocketMessage
+        void onMessage(Session session, String userCommandJson) {
+            UserGameCommand command = new Gson().fromJson(userCommandJson, UserGameCommand.class);
+            switch (command.getCommandType()) {
+                case CONNECT -> connect(command.visitorName());
+                case MAKE_MOVE -> makeMove(action.visitorName());
+                case LEAVE -> leaveGame(action.visitorName(), session);
+                case RESIGN -> resignGame(action.visitorName(), session);
+            }
+        }
 
-    //    func sendMessage(message, session)
-    //    func broadcastMessage(gameID, message, exceptThisSession);
+        void connect(String message){
+
+        }
+        void makeMove(String message){
+
+        }
+        void leaveGame(String message){
+
+        }
+        void resignGame(String message){
+
+        }
+
+        void sendMessage(String message, Session session){
+
+        }
+        void broadcastMessage(Integer gameID, String message, Session exceptThisSession){
+
+        }
 }
 
 
@@ -35,7 +66,7 @@ public class WebSocketHandler {
 //import webSocketMessages.Action;
 //import webSocketMessages.Notification;
 //
-//import java.io.IOException;
+
 //import java.util.Timer;
 //
 //
