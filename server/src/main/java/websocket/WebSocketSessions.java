@@ -1,14 +1,27 @@
 package websocket;
 
+import javax.websocket.Session;
 import java.util.HashMap;
 import java.util.HashSet;
 
 public class WebSocketSessions {
-    //    HashMap<GameID, HashSet<Session>> sessionMap;
+        HashMap<Integer, HashSet<Session>> sessionMap = new HashMap<>();
 
-    //    void addSessionToGame(gameID, session);
-    //    void removeSessionFromGame(gameID, session);
-    //    HashSet<Session> getSessionsForGame(gameID);
+        void addSessionToGame(Integer gameID, Session session){
+            if (!sessionMap.containsKey(gameID)) {
+                sessionMap.put(gameID, new HashSet<>());
+            }
+            HashSet<Session> gameSessions = sessionMap.get(gameID);
+            gameSessions.add(session);
+        }
+        void removeSessionFromGame(Integer gameID, Session session){
+            HashSet<Session> gameSessions = sessionMap.get(gameID);
+            gameSessions.remove(session);
+        }
+
+        HashSet<Session> getSessionsForGame(Integer gameID){
+            return sessionMap.get(gameID);
+        }
 }
 
 

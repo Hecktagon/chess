@@ -30,16 +30,16 @@ public class WebSocketHandler {
             }
         }
 
-        void connect(String message){
+        void connect(UserGameCommand command){
 
         }
-        void makeMove(String message){
+        void makeMove(UserGameCommand command){
 
         }
-        void leaveGame(String message){
+        void leaveGame(UserGameCommand command){
 
         }
-        void resignGame(String message){
+        void resignGame(UserGameCommand command){
 
         }
 
