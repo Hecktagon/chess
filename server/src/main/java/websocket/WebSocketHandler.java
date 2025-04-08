@@ -23,26 +23,28 @@ public class WebSocketHandler {
         void onMessage(Session session, String userCommandJson) {
             UserGameCommand command = new Gson().fromJson(userCommandJson, UserGameCommand.class);
             switch (command.getCommandType()) {
-                case CONNECT -> connect(command.visitorName());
-                case MAKE_MOVE -> makeMove(action.visitorName());
-                case LEAVE -> leaveGame(action.visitorName(), session);
-                case RESIGN -> resignGame(action.visitorName(), session);
+                case CONNECT -> connect(command, session);
+                case MAKE_MOVE -> makeMove(command, session);
+                case LEAVE -> leaveGame(command, session);
+                case RESIGN -> resignGame(command, session);
             }
         }
 
-        void connect(UserGameCommand command){
+        //TODO: I am unsure what these functions are supposed to take in/return.
+        void connect(UserGameCommand command, Session rootSession){
 
         }
-        void makeMove(UserGameCommand command){
+        void makeMove(UserGameCommand command, Session rootSession){
 
         }
-        void leaveGame(UserGameCommand command){
+        void leaveGame(UserGameCommand command, Session rootSession){
 
         }
-        void resignGame(UserGameCommand command){
+        void resignGame(UserGameCommand command, Session rootSession){
 
         }
 
+        //TODO: are these functions called in the above functions?
         void sendMessage(String message, Session session){
 
         }
