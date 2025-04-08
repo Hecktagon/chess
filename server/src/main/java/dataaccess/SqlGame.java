@@ -65,10 +65,10 @@ public class SqlGame implements GameDAO {
     public GameData updateGame(GameData gameData) throws ResponseException{
         var statement = """
         UPDATE game
-        SET whiteUsername = ?, blackUsername = ?
+        SET whiteUsername = ?, blackUsername = ?, chessGame = ?
         WHERE gameID = ?
         """;
-        executeUpdate(statement, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameID());
+        executeUpdate(statement, gameData.whiteUsername(), gameData.blackUsername(), new Gson().toJson(gameData.chessGame()) ,gameData.gameID());
         return gameData;
     }
 

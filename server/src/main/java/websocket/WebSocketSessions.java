@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class WebSocketSessions {
-        HashMap<Integer, HashSet<Session>> sessionMap = new HashMap<>();
+        private final HashMap<Integer, HashSet<Session>> sessionMap = new HashMap<>();
 
         void addSessionToGame(Integer gameID, Session session){
             if (!sessionMap.containsKey(gameID)) {

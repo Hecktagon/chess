@@ -1,6 +1,7 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import dataaccess.*;
 import exception.ResponseException;
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 import com.google.gson.Gson;
+import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -31,7 +33,7 @@ public class WebSocketHandler {
         }
 
         @OnWebSocketConnect
-        void onConnect(Session rootSession) throws ResponseException{
+        public void onConnect(Session rootSession) throws ResponseException{
             System.out.println(rootSession + " Successfully connected to websocket!");
             authDAO = new SqlAuth();
             gameDAO = new SqlGame();
@@ -39,7 +41,7 @@ public class WebSocketHandler {
         }
 
         @OnWebSocketError
-        void onError(Session rootSession, Throwable throwable) throws ResponseException{
+        public void onError(Session rootSession, Throwable throwable) throws ResponseException{
             ErrorMessage errMessage = new ErrorMessage("Connection Error: " + throwable.getMessage());
 
             try{
@@ -50,8 +52,9 @@ public class WebSocketHandler {
         }
 
         @OnWebSocketMessage
-        void onMessage(Session session, String userCommandJson) throws ResponseException{
+        public void onMessage(Session session, String userCommandJson) throws ResponseException{
             UserGameCommand command = new Gson().fromJson(userCommandJson, UserGameCommand.class);
+            authDAO.getAuth(command.getAuthToken());
             switch (command.getCommandType()) {
                 case CONNECT -> connect(command, session);
                 case MAKE_MOVE -> makeMove(new Gson().fromJson(userCommandJson, MakeMoveCommand.class), session);
@@ -67,22 +70,41 @@ public class WebSocketHandler {
             sendMessage(gameMessage, rootSession);
 
             // Creating the Notification for all other in-game users (including player color if user joins as player), and broadcasting it
-            UserData userData = userDAO.getUser(command.getAuthToken());
+            
+            AuthData authData = authDAO.getAuth(command.getAuthToken());
             NotificationMessage notification;
-            String userColor = (Objects.equals(userData.username(), gameData.whiteUsername())) ? "white":
-                    (Objects.equals(userData.username(), gameData.blackUsername())) ? "black" : null;
+            String userColor = (Objects.equals(authData.username(), gameData.whiteUsername())) ? "white":
+                    (Objects.equals(authData.username(), gameData.blackUsername())) ? "black" : null;
 
             if (userColor != null) {
-                notification = new NotificationMessage(userData.username() + " joined the game as " + userColor + ".");
+                notification = new NotificationMessage(authData.username() + " joined the game as " + userColor + ".");
             } else{
-                notification = new NotificationMessage(userData.username() + " is observing the game.");
+                notification = new NotificationMessage(authData.username() + " is observing the game.");
             }
-            broadcastMessage(gameData.gameID(), notification, rootSession);
+            broadcastMessage(gameData.gameID(), notification, rootSession, true);
         }
 
         void makeMove(MakeMoveCommand moveCommand, Session rootSession) throws ResponseException{
             GameData gameData = gameDAO.getGame(moveCommand.getGameID());
             ChessGame game = gameData.chessGame();
+
+            // if move is valid, make the move and update the game in database.
+            if(game.isValidMove(moveCommand.getMove())){
+                try {
+                    game.makeMove(moveCommand.getMove());
+                } catch (InvalidMoveException e){
+                    throw new ResponseException(401, "Invalid move");
+                }
+
+                // make the move in the database
+                GameData updatedGame = new GameData(gameData.whiteUsername(), gameData.blackUsername(),
+                        gameData.gameID(), gameData.gameName(), gameData.chessGame());
+                GameData gameAfterUpdate = gameDAO.updateGame(updatedGame);
+
+                // send the updated chessboard to everyone in the game
+                LoadGameMessage gameMessage = new LoadGameMessage(gameAfterUpdate.chessGame());
+                broadcastMessage(gameData.gameID(), gameMessage, rootSession, false);
+            }
 
         }
 
@@ -103,10 +125,11 @@ public class WebSocketHandler {
                 throw new ResponseException(500, "Failed to send LoadGameMessage to client: " + e.getMessage());
             }
         }
-        void broadcastMessage(Integer gameID, ServerMessage message, Session exceptThisSession) throws ResponseException{
+        void broadcastMessage(Integer gameID, ServerMessage message, Session rootSession, boolean exclude) throws ResponseException{
             HashSet<Session> gameSessions = sessions.getSessionsForGame(gameID);
             for (Session session : gameSessions){
-                if (session != exceptThisSession) {
+                // if exclude is false, the if condition always evaluates to true, meaning everyone gets the message
+                if (!exclude || session != rootSession) {
                     sendMessage(message, session);
                 }
             }
