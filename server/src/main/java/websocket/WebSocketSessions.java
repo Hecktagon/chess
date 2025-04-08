@@ -1,6 +1,6 @@
 package websocket;
 
-import javax.websocket.Session;
+import org.eclipse.jetty.websocket.api.Session;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -15,8 +15,12 @@ public class WebSocketSessions {
             gameSessions.add(session);
         }
         void removeSessionFromGame(Integer gameID, Session session){
-            HashSet<Session> gameSessions = sessionMap.get(gameID);
-            gameSessions.remove(session);
+            try {
+                HashSet<Session> gameSessions = sessionMap.get(gameID);
+                gameSessions.remove(session);
+            } catch (Exception e) {
+                System.out.println("Failed to leave game: no such game.");
+            }
         }
 
         HashSet<Session> getSessionsForGame(Integer gameID){

@@ -17,11 +17,11 @@ public class Server {
     ClearService clearService;
     UserService userService;
     GameService gameService;
+    WebSocketHandler webSocketHandler;
 
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
-
         AuthDAO authDAO;
         UserDAO userDAO;
         GameDAO gameDAO;
@@ -31,6 +31,7 @@ public class Server {
             authDAO = new SqlAuth();
             userDAO = new SqlUser();
             gameDAO = new SqlGame();
+            webSocketHandler = new WebSocketHandler();
             System.out.print("Successfully launched SQL database!\n");
         } catch (Throwable exception) {
             System.out.print("SQL failed with:\n" + exception.getMessage() + "\nSwitching to memory.\n");
@@ -46,7 +47,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // WebSocket Endpoint here
-        Spark.webSocket("/ws", WebSocketHandler);
+        Spark.webSocket("/ws", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::handleClearAll);

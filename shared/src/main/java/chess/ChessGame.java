@@ -61,6 +61,11 @@ public class ChessGame {
         BLACK
     }
 
+    public boolean isValidMove(ChessMove move){
+        Collection<ChessMove> valids = validMoves(move.getStartPosition());
+        return valids.contains(move);
+    }
+
     /**
      * Gets a valid moves for a piece at the given location
      *
