@@ -15,6 +15,7 @@ public class ChessGame {
     ChessBoard myBoard;
     int gameMoves;
     ChessPiece mostRecent;
+    boolean isOver;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
@@ -23,6 +24,7 @@ public class ChessGame {
         setTeamTurn(TeamColor.WHITE);
         gameMoves = 0;
         mostRecent = null;
+        isOver = false;
     }
 
     public int getGameMoves() {
@@ -78,6 +80,11 @@ public class ChessGame {
 
     private String pieceToShortcut(ChessPiece chessPiece){
         String shortcut = null;
+        if (chessPiece == null){
+            System.out.println("\n\nCHESSPIECE WAS NULL IN pieceToShortcut\n");
+            return "";
+        }
+
         ChessPiece.PieceType type = chessPiece.getPieceType();
         switch (type){
             case PAWN: shortcut = ""; break;
@@ -92,7 +99,7 @@ public class ChessGame {
     }
 
     public String toChessNotation(ChessMove move){
-        String pieceShortcut = pieceToShortcut(myBoard.getPiece(move.getStartPosition()));
+        String pieceShortcut = pieceToShortcut(myBoard.getPiece(move.getEndPosition()));
         int rowEnd = move.getEndPosition().getRow();
         int colEnd = move.getEndPosition().getColumn();
 
@@ -338,6 +345,14 @@ public class ChessGame {
                     || enemyAttacks.contains(new ChessPosition(kingStart.getRow(), kingStart.getColumn() - 2))
                     || enemyAttacks.contains(kingEnd);
         }
+    }
+
+    public boolean isOver() {
+        return isOver;
+    }
+
+    public void gameOver(){
+        isOver = true;
     }
 
     /**
