@@ -34,7 +34,7 @@ public class WebSocketHandler {
 
         @OnWebSocketConnect
         public void onConnect(Session rootSession) throws ResponseException{
-            System.out.println(rootSession + " Successfully connected to websocket!");
+            System.out.println(rootSession.getLocalAddress() + " Successfully connected to websocket!");
             authDAO = new SqlAuth();
             gameDAO = new SqlGame();
             userDAO = new SqlUser();
@@ -45,7 +45,7 @@ public class WebSocketHandler {
             ErrorMessage errMessage = new ErrorMessage("Connection Error: " + throwable.getMessage());
 
             try{
-                rootSession.getRemote().sendString(errMessage.getErrMessage());
+                rootSession.getRemote().sendString(new Gson().toJson(errMessage));
             } catch (IOException e) {
                 throw new ResponseException(500, "Failed to send error to client: " + e.getMessage());
             }
@@ -66,6 +66,10 @@ public class WebSocketHandler {
         void connect(UserGameCommand command, Session rootSession) throws ResponseException{
             // Creating the LoadGameMessage for the user, then sending it
             GameData gameData = gameDAO.getGame(command.getGameID());
+            if (gameData == null){
+                throw new ResponseException(400, "No such game.");
+            }
+
             LoadGameMessage gameMessage = new LoadGameMessage(gameData.chessGame());
             sendMessage(gameMessage, rootSession);
 

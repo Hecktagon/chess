@@ -11,8 +11,12 @@ public class WebSocketSessions {
             if (!sessionMap.containsKey(gameID)) {
                 sessionMap.put(gameID, new HashSet<>());
             }
-            HashSet<Session> gameSessions = sessionMap.get(gameID);
-            gameSessions.add(session);
+            try {
+                HashSet<Session> gameSessions = sessionMap.get(gameID);
+                gameSessions.add(session);
+            } catch (Exception e) {
+                System.out.println("Failed to add to game: no such game.");
+            }
         }
         void removeSessionFromGame(Integer gameID, Session session){
             try {
@@ -24,6 +28,9 @@ public class WebSocketSessions {
         }
 
         HashSet<Session> getSessionsForGame(Integer gameID){
+            if (!sessionMap.containsKey(gameID)) {
+                sessionMap.put(gameID, new HashSet<>());
+            }
             return sessionMap.get(gameID);
         }
 }
