@@ -108,7 +108,29 @@ public class WebSocketHandler {
                 // send the updated chessboard to everyone in the game
                 LoadGameMessage gameMessage = new LoadGameMessage(gameAfterUpdate.chessGame());
                 broadcastMessage(gameData.gameID(), gameMessage, rootSession, false);
+
+                // make and send move notification to everyone else
+                String moveString = game.toChessNotation(moveCommand.getMove());
+                broadcastMessage(gameData.gameID(), new NotificationMessage(moveString), rootSession, true);
+
+                // if in check, checkmate, or stalemate, notify everyone
+                NotificationMessage checkNotification = null;
+                if (game.isInCheckmate(ChessGame.TeamColor.WHITE)){
+                    checkNotification = new NotificationMessage("Black Wins!");
+                } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)){
+                    checkNotification = new NotificationMessage("White Wins!");
+                } else if ((game.isInStalemate(ChessGame.TeamColor.WHITE) && game.getTeamTurn() == ChessGame.TeamColor.WHITE) ||
+                        (game.isInStalemate(ChessGame.TeamColor.BLACK) && game.getTeamTurn() == ChessGame.TeamColor.BLACK)){
+                    checkNotification = new NotificationMessage("Stalemate!");
+                } else if (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)) {
+                    checkNotification = new NotificationMessage("Check");
+                }
+
+                if (checkNotification != null){
+                    broadcastMessage(gameData.gameID(), checkNotification, rootSession, false);
+                }
             }
+
 
         }
 

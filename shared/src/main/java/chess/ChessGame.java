@@ -61,6 +61,44 @@ public class ChessGame {
         BLACK
     }
 
+    private String colToLetter(int col){
+        String letter = null;
+        switch (col){
+            case 1: letter = "a"; break;
+            case 2: letter = "b"; break;
+            case 3: letter = "c"; break;
+            case 4: letter = "d"; break;
+            case 5: letter = "e"; break;
+            case 6: letter = "f"; break;
+            case 7: letter = "g"; break;
+            case 8: letter = "h"; break;
+        }
+        return letter;
+    }
+
+    private String pieceToShortcut(ChessPiece chessPiece){
+        String shortcut = null;
+        ChessPiece.PieceType type = chessPiece.getPieceType();
+        switch (type){
+            case PAWN: shortcut = ""; break;
+            case KNIGHT: shortcut = "N"; break;
+            case KING: shortcut = "K"; break;
+            case BISHOP: shortcut = "B"; break;
+            case QUEEN: shortcut = "Q"; break;
+            case ROOK: shortcut = "R"; break;
+
+        }
+        return shortcut;
+    }
+
+    public String toChessNotation(ChessMove move){
+        String pieceShortcut = pieceToShortcut(myBoard.getPiece(move.getStartPosition()));
+        int rowEnd = move.getEndPosition().getRow();
+        int colEnd = move.getEndPosition().getColumn();
+
+        return String.format("%s%s%s", pieceShortcut, colEnd, rowEnd);
+    }
+
     public boolean isValidMove(ChessMove move){
         Collection<ChessMove> valids = validMoves(move.getStartPosition());
         return valids.contains(move);
