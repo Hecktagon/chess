@@ -17,6 +17,10 @@ public class ChessBoard {
         board = new ChessPiece[8][8];
     }
 
+    public ChessPiece[][] getBoard() {
+        return board;
+    }
+
     public String shortcutMap(ChessPiece piece){
         if (piece == null){
             return " ";

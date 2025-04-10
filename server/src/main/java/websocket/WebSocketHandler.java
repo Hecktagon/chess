@@ -118,7 +118,7 @@ public class WebSocketHandler {
                 try {
                     game.makeMove(moveCommand.getMove());
                 } catch (InvalidMoveException e){
-                    throw new ResponseException(401, "makeMove 1 Invalid move");
+                    throw new ResponseException(401, "Invalid move");
                 }
 
                 // if in check, checkmate, or stalemate, make notification. Mark game as over if game ended.
@@ -155,7 +155,7 @@ public class WebSocketHandler {
                     broadcastMessage(gameData.gameID(), checkNotification, rootSession, false);
                 }
             } else {
-                throw new ResponseException(401, "makeMove 2 Invalid Move");
+                throw new ResponseException(401, "Invalid Move");
             }
         }
 

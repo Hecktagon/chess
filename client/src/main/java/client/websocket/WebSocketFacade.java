@@ -1,111 +1,86 @@
 package client.websocket;
 
-// extends endpoint and implements some interface
-// Not sure what "endpoint" is, is it Server? Also, what interface does this implement?
+import chess.ChessMove;
+import com.google.gson.Gson;
+import exception.ResponseException;
+import websocket.commands.MakeMoveCommand;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.Session;
+import javax.websocket.*;
+import java.io.IOException;
+import java.net.URI;
 
-public class WebSocketFacade extends Endpoint{
-        Session session;
-    //    GameHandler gameHandler;
+public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<String> {
+        public Session session;
+        GameHandler gameHandler;
+
+        public WebSocketFacade() throws ResponseException{
+            try {
+                URI uri = new URI("ws://localhost:8080/ws");
+                WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+                this.session = container.connectToServer(this, uri);
+            }catch (Exception e){
+                throw new ResponseException(500, "Error: Websocket connection failed: \n" + e);
+            }
+        }
 
         @Override //overridden from endpoint
-        public void onOpen(Session session, EndpointConfig endpointConfig){
+        public void onOpen(Session session, EndpointConfig endpointConfig){}
 
+    // OUTGOING MESSAGES TO SERVER
+        public void connect(String authToken, Integer gameID) throws ResponseException{
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+            sendMessage(new Gson().toJson(command));
         }
-    //
-    //    @Override
-    //    public void onClose(...); overridden from endpoint
-    //
-    //    @Override
-    //    public void onError(...); overridden from endpoint
+        public void makeMove(String authToken, Integer gameID, ChessMove chessMove) throws ResponseException{
+            MakeMoveCommand moveCommand = new MakeMoveCommand(chessMove, authToken, gameID);
+            sendMessage(new Gson().toJson(moveCommand));
+        }
+        public void leaveGame(String authToken, Integer gameID) throws ResponseException{
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
+            sendMessage(new Gson().toJson(command));
+        }
+        public void resignGame(String authToken, Integer gameID) throws ResponseException{
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
+            sendMessage(new Gson().toJson(command));
+        }
 
-    // OUTGOING MESSAGES
-    //    connect(...)
-    //    makeMove(...)
-    //    leaveGame(...)
-    //    resignGame(...)
+        public void sendMessage(String serverCommandJSON) throws ResponseException{
+            try {
+                this.session.getBasicRemote().sendText(serverCommandJSON);
+            } catch (IOException e) {
+                throw new ResponseException(500, "Error: failed to send websocket command to server: \n" + e);
+            }
+        }
 
-    //    private
-    //    sendMessage(...)
-    //        1. create command message
-    //        2. send message to server
+    // PROCESS INCOMING MESSAGES FROM SERVER:
+        @Override
+        public void onMessage(String message){
+            ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+            if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME){
+                LoadGameMessage gameMessage = new Gson().fromJson(message, LoadGameMessage.class);
+                gameHandler.updateGame(gameMessage.getChessGame(), null);
+            } else {
+                String clientMessage;
+                ServerMessage.ServerMessageType type;
+                if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR){
+                    ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+                    clientMessage = errorMessage.getErrMessage();
+                    type = ServerMessage.ServerMessageType.ERROR;
+                } else if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION){
+                    NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
+                    clientMessage = notification.getMessage();
+                    type = ServerMessage.ServerMessageType.NOTIFICATION;
+                } else {
+                    System.out.println("\n\n\n Somehow we ended up with an invalid ServerMessageType \n\n\n");
+                    return;
+                }
+                gameHandler.printMessage(clientMessage, type);
+            }
+        }
 
-    // PROCESS INCOMING MESSAGES:
-    //    onMessage(message)
-    //        1. deserialize message
-    //        2. call GameHandler to process message
 }
-
-
-
-// petshop WebSocketFacade:
-
-//package client.websocket;
-
-//import com.google.gson.Gson;
-//import exception.ResponseException;
-//import webSocketMessages.Action;
-//import webSocketMessages.Notification;
-//
-//import javax.websocket.*;
-//        import java.io.IOException;
-//import java.net.URI;
-//import java.net.URISyntaxException;
-
-//need to extend Endpoint for websocket to work properly
-//public class WebSocketFacade extends Endpoint {
-//
-//    Session session;
-//    NotificationHandler notificationHandler;
-//
-//
-//    public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
-//        try {
-//            url = url.replace("http", "ws");
-//            URI socketURI = new URI(url + "/ws");
-//            this.notificationHandler = notificationHandler;
-//
-//            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-//            this.session = container.connectToServer(this, socketURI);
-//
-//            //set message handler
-//            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-//                @Override
-//                public void onMessage(String message) {
-//                    Notification notification = new Gson().fromJson(message, Notification.class);
-//                    notificationHandler.notify(notification);
-//                }
-//            });
-//        } catch (DeploymentException | IOException | URISyntaxException ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
-//
-//    //Endpoint requires this method, but you don't have to do anything
-//    @Override
-//    public void onOpen(Session session, EndpointConfig endpointConfig) {
-//    }
-//
-//    public void enterPetShop(String visitorName) throws ResponseException {
-//        try {
-//            var action = new Action(Action.Type.ENTER, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//        } catch (IOException ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
-//
-//    public void leavePetShop(String visitorName) throws ResponseException {
-//        try {
-//            var action = new Action(Action.Type.EXIT, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//            this.session.close();
-//        } catch (IOException ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
-//
-//}

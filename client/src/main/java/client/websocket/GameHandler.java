@@ -1,6 +1,10 @@
 package client.websocket;
 
+import chess.ChessGame;
+import chess.ChessPosition;
+import websocket.messages.ServerMessage;
+
 public interface GameHandler {
-    //    updateGame(game);
-    //    printMessage(message);
+        void updateGame(ChessGame game, ChessPosition posValids, ChessGame.TeamColor team);
+        void printMessage(String message, ServerMessage.ServerMessageType type);
 }

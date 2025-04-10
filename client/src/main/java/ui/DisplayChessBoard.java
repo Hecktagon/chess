@@ -1,5 +1,8 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+
 import java.util.HashMap;
 
 import static ui.EscapeSequences.*;
@@ -34,7 +37,11 @@ public class DisplayChessBoard {
     {"P", "P", "P", "P", "P", "P", "P", "P"},
     {"R", "N", "B", "Q", "K", "B", "N", "R"}};
 
-    private static String[][] flipBoard(String[][] stringBoard) {
+    private static String[][] gameToStringArray(ChessGame game){
+        return null;
+    }
+
+    public static String[][] flipBoard(String[][] stringBoard) {
         int rows = stringBoard.length;
         int cols = stringBoard[0].length;
         String[][] flippedBoard = new String[rows][cols];
@@ -92,6 +99,8 @@ public class DisplayChessBoard {
             rowIndex++;
         }
     }
+
+    public static String
 
     public static void printGame(String[][] stringBoard, String color){
         if (stringBoard == null){
