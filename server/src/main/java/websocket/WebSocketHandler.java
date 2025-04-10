@@ -59,11 +59,15 @@ public class WebSocketHandler {
 
         @OnWebSocketMessage
         public void onMessage(Session session, String userCommandJson) throws ResponseException{
-//            try {
+            try {
                 UserGameCommand command = new Gson().fromJson(userCommandJson, UserGameCommand.class);
                 AuthData auth = authDAO.getAuth(command.getAuthToken());
                 if (auth == null) {
                     throw new ResponseException(400, "Unauthorized.");
+                }
+                GameData gameData = gameDAO.getGame(command.getGameID());
+                if (gameData == null){
+                    throw new ResponseException(400, "No such game.");
                 }
                 switch (command.getCommandType()) {
                     case CONNECT -> connect(command, session);
@@ -71,18 +75,15 @@ public class WebSocketHandler {
                     case LEAVE -> leaveGame(command, session);
                     case RESIGN -> resignGame(command, session);
                 }
-//            } catch (Exception e){
-//                System.out.println("\n\n" + e.getMessage() + "\n\n");
-//                e.printStackTrace();
-//            }
+            } catch (Exception e){
+                System.out.println("\n\n" + e.getMessage() + "\n\n");
+                throw new ResponseException(405, "onMessage error: " + e.getMessage());
+            }
         }
 
         void connect(UserGameCommand command, Session rootSession) throws ResponseException{
             // Creating the LoadGameMessage for the user, then sending it
             GameData gameData = gameDAO.getGame(command.getGameID());
-            if (gameData == null){
-                throw new ResponseException(400, "No such game.");
-            }
             sessions.addSessionToGame(gameData.gameID(), rootSession);
 
             LoadGameMessage gameMessage = new LoadGameMessage(gameData.chessGame());
@@ -104,15 +105,20 @@ public class WebSocketHandler {
 
         void makeMove(MakeMoveCommand moveCommand, Session rootSession) throws ResponseException{
             GameData gameData = gameDAO.getGame(moveCommand.getGameID());
+            AuthData authData = authDAO.getAuth(moveCommand.getAuthToken());
             ChessGame game = gameData.chessGame();
 
             // if move is valid, make the move.
+            String userColor = findUserColor(authData, gameData);
+            boolean correctTurn = (Objects.equals(userColor, "white") && game.getTeamTurn() == ChessGame.TeamColor.WHITE) ||
+                    (Objects.equals(userColor, "black") && game.getTeamTurn() == ChessGame.TeamColor.BLACK);
+            boolean isPlayer = userColor != null;
             boolean isGameOver = game.isOver();
-            if(game.isValidMove(moveCommand.getMove()) && !isGameOver){
+            if(game.isValidMove(moveCommand.getMove()) && !isGameOver && isPlayer && correctTurn){
                 try {
                     game.makeMove(moveCommand.getMove());
                 } catch (InvalidMoveException e){
-                    throw new ResponseException(401, "Invalid move");
+                    throw new ResponseException(401, "makeMove 1 Invalid move");
                 }
 
                 // if in check, checkmate, or stalemate, make notification. Mark game as over if game ended.
@@ -148,19 +154,16 @@ public class WebSocketHandler {
                 if (checkNotification != null){
                     broadcastMessage(gameData.gameID(), checkNotification, rootSession, false);
                 }
+            } else {
+                throw new ResponseException(401, "makeMove 2 Invalid Move");
             }
-            throw new ResponseException(401, "Invalid Move");
         }
 
         void leaveGame(UserGameCommand command, Session rootSession) throws ResponseException {
             GameData gameData = gameDAO.getGame(command.getGameID());
-            ChessGame game = gameData.chessGame();
-            if (game == null){
-                throw new ResponseException(400, "No such game.");
-            }
+            AuthData authData = authDAO.getAuth(command.getAuthToken());
 
             // update database to remove user from game if they are a player
-            AuthData authData = authDAO.getAuth(command.getAuthToken());
             String userColor = findUserColor(authData, gameData);
             if (Objects.equals(userColor, "white")){
                 GameData updatedGameData = new GameData(null, gameData.blackUsername(),
@@ -172,14 +175,38 @@ public class WebSocketHandler {
                 gameDAO.updateGame(updatedGameData);
             }
 
-            // whether a player or observer left, notify everyone else in the game
+            // remove session from Sessions:
+            sessions.removeSessionFromGame(gameData.gameID(), rootSession);
+
+            // if a player or observer left, notify everyone else in the game
             NotificationMessage leaveNotification = new NotificationMessage(authData.username() + " left the game.");
             broadcastMessage(gameData.gameID(), leaveNotification, rootSession, true);
+
         }
 
         void resignGame(UserGameCommand command, Session rootSession) throws ResponseException{
             GameData gameData = gameDAO.getGame(command.getGameID());
+            AuthData authData = authDAO.getAuth(command.getAuthToken());
             ChessGame game = gameData.chessGame();
+
+            String playerColor = findUserColor(authData, gameData);
+            if (playerColor != null && !game.isOver()) {
+
+                // mark the game as over
+                game.gameOver();
+
+                //update gameover in the database
+                GameData resignedGame = new GameData(gameData.whiteUsername(), gameData.blackUsername(),
+                        gameData.gameID(), gameData.gameName(), game);
+                gameDAO.updateGame(resignedGame);
+
+                // notify everyone of resignation
+                NotificationMessage resignMessage = new NotificationMessage(authData.username() + " resigned!");
+                broadcastMessage(gameData.gameID(), resignMessage, rootSession, false);
+            }else {
+                ErrorMessage resignFailed = new ErrorMessage("Error: you can't resign now");
+                sendMessage(resignFailed, rootSession);
+            }
         }
 
         String findUserColor(AuthData authData, GameData gameData){
@@ -205,65 +232,7 @@ public class WebSocketHandler {
                     }
                 }
             } catch (Exception e) {
-                throw new ResponseException(501, "Broadcast failed with error: " + e.toString());
+                throw new ResponseException(501, "Broadcast failed with error: " + e);
             }
         }
 }
-
-
-
-// petshop's WebSocketHandler:
-
-//package server.websocket;
-//
-//import com.google.gson.Gson;
-//import dataaccess.DataAccess;
-//import exception.ResponseException;
-//import org.eclipse.jetty.websocket.api.Session;
-//import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-//import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-//import webSocketMessages.Action;
-//import webSocketMessages.Notification;
-//
-
-//import java.util.Timer;
-//
-//
-//@WebSocket
-//public class WebSocketHandler {
-//
-//    private final ConnectionManager connections = new ConnectionManager();
-//
-//    @OnWebSocketMessage
-//    public void onMessage(Session session, String message) throws IOException {
-//        Action action = new Gson().fromJson(message, Action.class);
-//        switch (action.type()) {
-//            case ENTER -> enter(action.visitorName(), session);
-//            case EXIT -> exit(action.visitorName());
-//        }
-//    }
-//
-//    private void enter(String visitorName, Session session) throws IOException {
-//        connections.add(visitorName, session);
-//        var message = String.format("%s is in the shop", visitorName);
-//        var notification = new Notification(Notification.Type.ARRIVAL, message);
-//        connections.broadcast(visitorName, notification);
-//    }
-//
-//    private void exit(String visitorName) throws IOException {
-//        connections.remove(visitorName);
-//        var message = String.format("%s left the shop", visitorName);
-//        var notification = new Notification(Notification.Type.DEPARTURE, message);
-//        connections.broadcast(visitorName, notification);
-//    }
-//
-//    public void makeNoise(String petName, String sound) throws ResponseException {
-//        try {
-//            var message = String.format("%s says %s", petName, sound);
-//            var notification = new Notification(Notification.Type.NOISE, message);
-//            connections.broadcast("", notification);
-//        } catch (Exception ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
-//}
