@@ -59,6 +59,7 @@ public class WebSocketHandler {
 
         @OnWebSocketMessage
         public void onMessage(Session session, String userCommandJson) throws ResponseException{
+            System.out.println("MADE IT TO WEBSOCKET ONMESSAGE");
             try {
                 UserGameCommand command = new Gson().fromJson(userCommandJson, UserGameCommand.class);
                 AuthData auth = authDAO.getAuth(command.getAuthToken());
@@ -82,6 +83,7 @@ public class WebSocketHandler {
         }
 
         void connect(UserGameCommand command, Session rootSession) throws ResponseException{
+            System.out.println("MADE IT TO WEBSOCKET CONNECT");
             // Creating the LoadGameMessage for the user, then sending it
             GameData gameData = gameDAO.getGame(command.getGameID());
             sessions.addSessionToGame(gameData.gameID(), rootSession);

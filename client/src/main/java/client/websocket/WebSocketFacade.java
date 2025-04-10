@@ -1,6 +1,7 @@
 package client.websocket;
 
 import chess.ChessMove;
+import client.Client;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import websocket.commands.MakeMoveCommand;
@@ -14,6 +15,9 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 
+import static ui.EscapeSequences.RESET_TEXT_COLOR;
+import static ui.EscapeSequences.SET_TEXT_COLOR_GREEN;
+
 public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<String> {
         public Session session;
         GameHandler gameHandler;
@@ -21,6 +25,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
         public WebSocketFacade() throws ResponseException{
             try {
                 URI uri = new URI("ws://localhost:8080/ws");
+                gameHandler = new Client(uri.toURL().toString());
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();
                 this.session = container.connectToServer(this, uri);
             }catch (Exception e){
@@ -33,6 +38,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
 
     // OUTGOING MESSAGES TO SERVER
         public void connect(String authToken, Integer gameID) throws ResponseException{
+            System.out.println(SET_TEXT_COLOR_GREEN + "CONNECTING TO GAME" + RESET_TEXT_COLOR);
             UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
             sendMessage(new Gson().toJson(command));
         }
@@ -60,6 +66,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
     // PROCESS INCOMING MESSAGES FROM SERVER:
         @Override
         public void onMessage(String message){
+            System.out.println(SET_TEXT_COLOR_GREEN + "RECEIVED MESSAGE FROM SERVER" + RESET_TEXT_COLOR);
             ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
             if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME){
                 LoadGameMessage gameMessage = new Gson().fromJson(message, LoadGameMessage.class);

@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import client.websocket.GameHandler;
 import client.websocket.WebSocketFacade;
@@ -11,10 +13,10 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import resreq.*;
 import ui.DisplayChessBoard;
+import ui.EscapeSequences;
 import websocket.messages.ServerMessage;
 
-import static ui.EscapeSequences.RESET_TEXT_COLOR;
-import static ui.EscapeSequences.SET_TEXT_COLOR_RED;
+import static ui.EscapeSequences.*;
 
 public class Client implements GameHandler {
     private HashMap<Integer, Integer> gameList = new HashMap<>();
@@ -37,6 +39,7 @@ public class Client implements GameHandler {
 
     @Override
     public void updateGame(ChessGame game, ChessPosition posValids){
+        System.out.println(SET_TEXT_COLOR_GREEN + "UPDATING GAME" + RESET_TEXT_COLOR);
         curGame = game;
         DisplayChessBoard.printChessGame(game, team, posValids);
     }
@@ -69,7 +72,7 @@ public class Client implements GameHandler {
                 case "makemove" -> clientMakeMove(params);
                 case "resign" -> clientResign();
                 case "showmoves" -> clientShowLegalMoves(params);
-                case "quit" -> clientQuit();
+                case "quit" -> "quit";
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -83,69 +86,143 @@ public class Client implements GameHandler {
         }
     }
 
+    private static int letterToCol(String letter) {
+        letter = letter.toLowerCase();
+
+        HashMap<String, Integer> letterToNumberMap = new HashMap<>();
+        letterToNumberMap.put("a", 1);
+        letterToNumberMap.put("b", 2);
+        letterToNumberMap.put("c", 3);
+        letterToNumberMap.put("d", 4);
+        letterToNumberMap.put("e", 5);
+        letterToNumberMap.put("f", 6);
+        letterToNumberMap.put("g", 7);
+        letterToNumberMap.put("h", 8);
+
+        return letterToNumberMap.getOrDefault(letter, -1);
+    }
+
+    private ChessPiece.PieceType shortcutToPiece(String shortcut){
+        HashMap<String, ChessPiece.PieceType> shortcuts = new HashMap<>();
+
+        shortcuts.put("Q", ChessPiece.PieceType.QUEEN);
+        shortcuts.put("K", ChessPiece.PieceType.KING);
+        shortcuts.put("R", ChessPiece.PieceType.ROOK);
+        shortcuts.put("N", ChessPiece.PieceType.KNIGHT);
+        shortcuts.put("B", ChessPiece.PieceType.BISHOP);
+        shortcuts.put("P", ChessPiece.PieceType.PAWN);
+
+        return shortcuts.get(shortcut);
+    }
+
+    private boolean inBounds(Integer x, Integer y){
+        return 1 <= x && x <= 8 && 1 <= y && y <= 8;
+    }
+
+    private ChessPosition chessPositionProcessor(String stringPos)throws ResponseException{
+        String strCol = String.valueOf(stringPos.charAt(0));
+        Integer row = (int) stringPos.charAt(1);
+        Integer col = letterToCol(strCol);
+        return new ChessPosition(row, col);
+    }
+
+    private ChessMove chessNotationProcessor(String stringMove) throws ResponseException{
+        ChessMove move;
+        try {
+            String startStrCol = String.valueOf(stringMove.charAt(0));
+            Integer startRow = (int) stringMove.charAt(1);
+            Integer startCol = letterToCol(startStrCol);
+            String endStrCol = String.valueOf(stringMove.charAt(3));
+            Integer endRow = (int) stringMove.charAt(4);
+            Integer endCol = letterToCol(endStrCol);
+            ChessPiece.PieceType promoPiece = null;
+
+            if (stringMove.length() == 7){
+                promoPiece = shortcutToPiece(String.valueOf(stringMove.charAt(6)));
+            }
+            if (!inBounds(startRow, startCol) || !inBounds(endRow, endCol)){
+                throw new ResponseException(400, "Invalid makemove Input.");
+            }
+
+            move = new ChessMove(new ChessPosition(startRow, startCol), new ChessPosition(endRow, endCol), promoPiece);
+        } catch(Exception e) {
+            throw new ResponseException(400, "Invalid makemove Input. Try: makemove <chessmove>," +
+                    "\n(ex. <e2 e4> or <f3 h3> or <b7 b8 Q> for a promotion to Queen");
+        }
+        return move;
+    }
+
+    private void gameCheck(String errMessage)throws ResponseException {
+        if (curGame == null) {
+            throw new ResponseException(400, errMessage);
+        }
+        if (authToken == null) {
+            throw new ResponseException(400, errMessage);
+        }
+        if (!gameList.containsKey(inGameID)) {
+            throw new ResponseException(400, errMessage);
+        }
+    }
+
     private void leaveGameReset(){
         inGameID = null;
         observing = false;
         team = ChessGame.TeamColor.WHITE;
     }
 
-    // TODO: what is quit supposed to do if you're in a game
-    public String clientQuit() throws ResponseException{
-        return "quit";
-    }
-
     public String clientRedraw() throws ResponseException{
         assertSignedIn();
-        if (curGame == null){
-            throw new ResponseException(400, "You can't draw a game right now");
-        }
-        if (authToken == null){
-            throw new ResponseException(400, "You can't draw a game right now");
-        }
-        if (!gameList.containsKey(inGameID)) {
-            throw new ResponseException(400, "You can't draw a game right now");
-        } else {
-            updateGame(curGame, null);
-        }
+        gameCheck("You can't draw a game right now");
+        updateGame(curGame, null);
+
         return "board redrawn!";
     }
 
     public String clientLeave()throws ResponseException{
         assertSignedIn();
-        if (authToken == null){
-            throw new ResponseException(400, "You can't leave a game right now");
-        }
-        if (!gameList.containsKey(inGameID)){
-            throw new ResponseException(400, "You can't leave a game right now");
-        } else {
-            websocket.leaveGame(authToken, gameList.get(inGameID));
-            leaveGameReset();
-        }
+        gameCheck("You can't leave a game right now");
+        websocket.leaveGame(authToken, gameList.get(inGameID));
+        leaveGameReset();
+
         return "You left the game";
     }
 
     public String clientMakeMove(String... params) throws ResponseException{
         assertSignedIn();
-        if (authToken == null){
-            throw new ResponseException(400, "You can't make a move right now");
+        if (params.length != 1){
+            throw new ResponseException(400, "Invalid makemove Input. Try: makemove <chessmove>," +
+                    "\n(ex. <e2 e4> or <f3 h3> or <b7 b8 Q> for a promotion to Queen");
         }
-        if (!gameList.containsKey(inGameID)){
-            throw new ResponseException(400, "You can't make a move right now");
-        } else {
-            websocket.makeMove(authToken, gameList.get(inGameID), move);
-            leaveGameReset();
+        gameCheck("You can't make a move right now");
+        String stringMove = params[0];
+        if (!(stringMove.length() == 5 || stringMove.length() == 7)) {
+            throw new ResponseException(401, "Invalid makemove Input. Try: makemove <chessmove>," +
+                    "\n(ex. <e2 e4> or <f3 h3>");
         }
-        return "You left the game";
+
+        ChessMove move = chessNotationProcessor(stringMove);
+
+        websocket.makeMove(authToken, gameList.get(inGameID), move);
+        return "You made move: " + stringMove;
+
     }
 
     public String clientResign() throws ResponseException{
         assertSignedIn();
-        return null;
+        gameCheck("You can't resign right now");
+        websocket.resignGame(authToken,gameList.get(inGameID));
+        return "You resigned";
     }
 
     public String clientShowLegalMoves(String... params) throws ResponseException{
         assertSignedIn();
-        return null;
+        gameCheck("You can't check moves right now");
+        if (params.length != 1 || params[0].length() != 2){
+            throw new ResponseException(400, "Invalid showmoves Input. Try: showmoves <position> (ex. b4)");
+        }
+
+        updateGame(curGame, chessPositionProcessor(params[0]));
+        return "Showing moves for " + params[0];
     }
 
     public String clientLogin(String... params) throws ResponseException {
@@ -242,6 +319,7 @@ public class Client implements GameHandler {
             }
             team = teamColor;
             inGameID = Integer.parseInt(params[1]);
+            System.out.println(SET_TEXT_COLOR_GREEN + "JOINED GAME" + RESET_TEXT_COLOR);
             websocket.connect(authToken, gameList.get(inGameID));
             return String.format("%s joined the game!\n", visitorName);
         }
@@ -293,7 +371,6 @@ public class Client implements GameHandler {
                     - redraw (redraws the chessboard)
                     - leave
                     - showmoves <piece position>
-                    - quit
                     """;
             } else {
                 return """

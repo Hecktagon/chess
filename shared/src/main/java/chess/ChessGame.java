@@ -100,10 +100,12 @@ public class ChessGame {
 
     public String toChessNotation(ChessMove move){
         String pieceShortcut = pieceToShortcut(myBoard.getPiece(move.getEndPosition()));
+        int rowStart = move.getStartPosition().getRow();
+        String colStart = colToLetter(move.getStartPosition().getColumn());
         int rowEnd = move.getEndPosition().getRow();
-        int colEnd = move.getEndPosition().getColumn();
+        String colEnd = colToLetter(move.getEndPosition().getColumn());
 
-        return String.format("%s%s%s", pieceShortcut, colEnd, rowEnd);
+        return String.format("%s%s%s %s%s", pieceShortcut, colStart, rowStart, colEnd, rowEnd);
     }
 
     public boolean isValidMove(ChessMove move){
