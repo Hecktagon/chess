@@ -21,7 +21,7 @@ public class ChessBoard {
         return board;
     }
 
-    public String shortcutMap(ChessPiece piece){
+    public static String shortcutMap(ChessPiece piece){
         if (piece == null){
             return " ";
         }
