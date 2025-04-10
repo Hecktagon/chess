@@ -1,13 +1,24 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static ui.EscapeSequences.*;
 
 public class DisplayChessBoard {
+    ChessGame game;
+    ChessGame.TeamColor team;
+    ChessPosition position;
+
+    public DisplayChessBoard(ChessGame chessGame, ChessGame.TeamColor teamColor, ChessPosition chessPosition){
+        game = chessGame;
+        team = teamColor;
+        position = chessPosition;
+        String unicodeBoard =
+    }
 
     // a map of piece shortcuts to chess piece images
     private static String shortcutConverter(String shortcut) {
@@ -36,10 +47,6 @@ public class DisplayChessBoard {
     {null, null, null, null, null, null, null, null},
     {"P", "P", "P", "P", "P", "P", "P", "P"},
     {"R", "N", "B", "Q", "K", "B", "N", "R"}};
-
-    private static String[][] gameToStringArray(ChessGame game){
-        return null;
-    }
 
     public static String[][] flipBoard(String[][] stringBoard) {
         int rows = stringBoard.length;
@@ -74,6 +81,7 @@ public class DisplayChessBoard {
                     System.out.print(SET_BG_COLOR_BLACK + SET_TEXT_COLOR_WHITE + rowLabels[rowIndex]);
                 }
                 String currPiece = (tile == null) ? " " : tile;
+
                 currPiece = (shortcutConverter(currPiece));
                 if (tileColor % 2 == 0){
                     System.out.print(SET_BG_COLOR_WHITE + currPiece);
@@ -100,9 +108,21 @@ public class DisplayChessBoard {
         }
     }
 
-    public static String
+    public static void printChessBoard(ChessBoard board, ChessGame.TeamColor team, ChessPosition validMovesPos){
 
-    public static void printGame(String[][] stringBoard, String color){
+    }
+
+    private static String[][] gameToStringArray(ChessGame game, ChessPosition validMovesPos){
+        ChessBoard board = game.getBoard();
+        Collection<ChessMove> valids = new HashSet<>();
+        if (validMovesPos != null) {
+            valids = game.validMoves(validMovesPos);
+        }
+
+    }
+
+
+    private static void printStringBoard(String[][] stringBoard, String color){
         if (stringBoard == null){
             stringBoard = startingBoardWhite;
         }

@@ -5,6 +5,6 @@ import chess.ChessPosition;
 import websocket.messages.ServerMessage;
 
 public interface GameHandler {
-        void updateGame(ChessGame game, ChessPosition posValids, ChessGame.TeamColor team);
+        void updateGame(ChessGame game, ChessPosition posValids);
         void printMessage(String message, ServerMessage.ServerMessageType type);
 }

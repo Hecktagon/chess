@@ -4,21 +4,42 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import chess.ChessGame;
+import chess.ChessPosition;
+import client.websocket.GameHandler;
+import client.websocket.WebSocketFacade;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import resreq.*;
+import ui.DisplayChessBoard;
+import websocket.messages.ServerMessage;
 
-public class Client {
+public class Client implements GameHandler {
     private HashMap<Integer, Integer> gameList = new HashMap<>();
     private String visitorName = null;
     private String authToken = null;
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.SIGNEDOUT;
+    private final WebSocketFacade websocket;
+    private ChessGame.TeamColor team = ChessGame.TeamColor.WHITE;
+    private Integer inGameID = null;
 
-    public Client(String serverUrl) throws ResponseException{
+    public Client (String serverUrl) throws ResponseException{
         server = new ServerFacade(serverUrl);
+        websocket = new WebSocketFacade();
         this.serverUrl = serverUrl;
+    }
+
+    @Override
+    public void updateGame(ChessGame game, ChessPosition posValids){
+//        if (posValids == null){
+//            DisplayChessBoard.printGame();
+//        }
+    }
+
+    @Override
+    public void printMessage(String message, ServerMessage.ServerMessageType type){
+
     }
 
     public String eval(String input) throws ResponseException {
