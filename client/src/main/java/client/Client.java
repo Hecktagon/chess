@@ -27,6 +27,7 @@ public class Client implements GameHandler {
     private ChessGame.TeamColor team = ChessGame.TeamColor.WHITE;
     private Integer inGameID = null;
     private boolean observing = false;
+    private ChessGame curGame = null;
 
     public Client (String serverUrl) throws ResponseException{
         server = new ServerFacade(serverUrl);
@@ -36,6 +37,7 @@ public class Client implements GameHandler {
 
     @Override
     public void updateGame(ChessGame game, ChessPosition posValids){
+        curGame = game;
         DisplayChessBoard.printChessGame(game, team, posValids);
     }
 
@@ -94,12 +96,18 @@ public class Client implements GameHandler {
 
     public String clientRedraw() throws ResponseException{
         assertSignedIn();
+        if (curGame == null){
+            throw new ResponseException(400, "You can't draw a game right now");
+        }
         if (authToken == null){
             throw new ResponseException(400, "You can't draw a game right now");
         }
         if (!gameList.containsKey(inGameID)) {
             throw new ResponseException(400, "You can't draw a game right now");
+        } else {
+            updateGame(curGame, null);
         }
+        return "board redrawn!";
     }
 
     public String clientLeave()throws ResponseException{
@@ -118,7 +126,16 @@ public class Client implements GameHandler {
 
     public String clientMakeMove(String... params) throws ResponseException{
         assertSignedIn();
-        return null;
+        if (authToken == null){
+            throw new ResponseException(400, "You can't make a move right now");
+        }
+        if (!gameList.containsKey(inGameID)){
+            throw new ResponseException(400, "You can't make a move right now");
+        } else {
+            websocket.makeMove(authToken, gameList.get(inGameID), move);
+            leaveGameReset();
+        }
+        return "You left the game";
     }
 
     public String clientResign() throws ResponseException{
