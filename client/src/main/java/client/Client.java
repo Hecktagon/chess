@@ -13,6 +13,9 @@ import resreq.*;
 import ui.DisplayChessBoard;
 import websocket.messages.ServerMessage;
 
+import static ui.EscapeSequences.RESET_TEXT_COLOR;
+import static ui.EscapeSequences.SET_TEXT_COLOR_RED;
+
 public class Client implements GameHandler {
     private HashMap<Integer, Integer> gameList = new HashMap<>();
     private String visitorName = null;
@@ -23,6 +26,7 @@ public class Client implements GameHandler {
     private final WebSocketFacade websocket;
     private ChessGame.TeamColor team = ChessGame.TeamColor.WHITE;
     private Integer inGameID = null;
+    private boolean observing = false;
 
     public Client (String serverUrl) throws ResponseException{
         server = new ServerFacade(serverUrl);
@@ -32,14 +36,16 @@ public class Client implements GameHandler {
 
     @Override
     public void updateGame(ChessGame game, ChessPosition posValids){
-//        if (posValids == null){
-//            DisplayChessBoard.printGame();
-//        }
+        DisplayChessBoard.printChessGame(game, team, posValids);
     }
 
     @Override
     public void printMessage(String message, ServerMessage.ServerMessageType type){
-
+        if (type == ServerMessage.ServerMessageType.ERROR){
+            System.out.print("\n" + SET_TEXT_COLOR_RED + message + "\n");
+        } else {
+            System.out.print("\n" + RESET_TEXT_COLOR + message);
+        }
     }
 
     public String eval(String input) throws ResponseException {
@@ -56,7 +62,12 @@ public class Client implements GameHandler {
                 case "listgames" -> clientListGames();
                 case "play" -> clientJoinGame(params);
                 case "observe" -> observeGame(params);
-                case "quit" -> "quit";
+                case "redraw" -> clientRedraw();
+                case "leave" -> clientLeave();
+                case "makemove" -> clientMakeMove(params);
+                case "resign" -> clientResign();
+                case "showmoves" -> clientShowLegalMoves(params);
+                case "quit" -> clientQuit();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -68,6 +79,56 @@ public class Client implements GameHandler {
         if (state == State.SIGNEDOUT) {
             throw new ResponseException(400, "Unauthorized: You must sign in");
         }
+    }
+
+    private void leaveGameReset(){
+        inGameID = null;
+        observing = false;
+        team = ChessGame.TeamColor.WHITE;
+    }
+
+    // TODO: what is quit supposed to do if you're in a game
+    public String clientQuit() throws ResponseException{
+        return "quit";
+    }
+
+    public String clientRedraw() throws ResponseException{
+        assertSignedIn();
+        if (authToken == null){
+            throw new ResponseException(400, "You can't draw a game right now");
+        }
+        if (!gameList.containsKey(inGameID)) {
+            throw new ResponseException(400, "You can't draw a game right now");
+        }
+    }
+
+    public String clientLeave()throws ResponseException{
+        assertSignedIn();
+        if (authToken == null){
+            throw new ResponseException(400, "You can't leave a game right now");
+        }
+        if (!gameList.containsKey(inGameID)){
+            throw new ResponseException(400, "You can't leave a game right now");
+        } else {
+            websocket.leaveGame(authToken, gameList.get(inGameID));
+            leaveGameReset();
+        }
+        return "You left the game";
+    }
+
+    public String clientMakeMove(String... params) throws ResponseException{
+        assertSignedIn();
+        return null;
+    }
+
+    public String clientResign() throws ResponseException{
+        assertSignedIn();
+        return null;
+    }
+
+    public String clientShowLegalMoves(String... params) throws ResponseException{
+        assertSignedIn();
+        return null;
     }
 
     public String clientLogin(String... params) throws ResponseException {
@@ -140,8 +201,8 @@ public class Client implements GameHandler {
 
     public String clientJoinGame(String... params) throws ResponseException {
         assertSignedIn();
+        ChessGame.TeamColor teamColor;
         if (params.length == 2) {
-            ChessGame.TeamColor teamColor;
             try{
                 Integer.parseInt(params[1]);
             } catch (NumberFormatException e) {
@@ -162,7 +223,9 @@ public class Client implements GameHandler {
             } catch (ResponseException error){
                 throw new ResponseException(402, "Unauthorized: " + error.getMessage());
             }
-            // websocket 
+            team = teamColor;
+            inGameID = Integer.parseInt(params[1]);
+            websocket.connect(authToken, gameList.get(inGameID));
             return String.format("%s joined the game!\n", visitorName);
         }
         throw new ResponseException(400, "Invalid Join Game Input. Try: play <white/black> <gameID>");
@@ -180,6 +243,9 @@ public class Client implements GameHandler {
                 throw new ResponseException(401,
                         "Invalid Observe Game Input, gameID must be numeric. Try: observe <gameID>");
             }
+            inGameID = Integer.parseInt(params[0]);
+            websocket.connect(authToken, gameList.get(inGameID));
+            observing = true;
             return String.format("%s is observing the game", visitorName);
         }
         throw new ResponseException(400, "Invalid Observe Game Input. Try: observe <gameID>");
@@ -193,15 +259,36 @@ public class Client implements GameHandler {
                     - login <username> <password>
                     - quit
                     """;
+        }else {
+            if (state == State.SIGNEDIN && gameList.containsKey(inGameID) && !observing) {
+                return """
+                        - help
+                        - redraw (redraws the chessboard)
+                        - leave
+                        - makemove <move in chess notation>
+                        - resign
+                        - showmoves <piece position>
+                        - quit
+                        """;
+            } else if (state == State.SIGNEDIN && gameList.containsKey(inGameID) && observing) {
+                return """
+                    - help
+                    - redraw (redraws the chessboard)
+                    - leave
+                    - showmoves <piece position>
+                    - quit
+                    """;
+            } else {
+                return """
+                    - help
+                    - newgame <gamename>
+                    - listgames
+                    - play <white/black> <game ID>
+                    - observe <game ID>
+                    - logout
+                    - quit
+                    """;
+            }
         }
-        return """
-                - help
-                - newgame <gamename>
-                - listgames
-                - play <white/black> <game ID>
-                - observe <game ID>
-                - logout
-                - quit
-                """;
     }
 }
