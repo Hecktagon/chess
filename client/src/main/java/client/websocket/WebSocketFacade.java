@@ -25,7 +25,6 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
         public WebSocketFacade() throws ResponseException{
             try {
                 URI uri = new URI("ws://localhost:8080/ws");
-                gameHandler = new Client(uri.toURL().toString());
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();
                 this.session = container.connectToServer(this, uri);
             }catch (Exception e){
