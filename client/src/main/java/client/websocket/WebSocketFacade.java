@@ -56,6 +56,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
 
         public void sendMessage(String serverCommandJSON) throws ResponseException{
             try {
+
                 this.session.getBasicRemote().sendText(serverCommandJSON);
             } catch (IOException e) {
                 throw new ResponseException(500, "Error: failed to send websocket command to server: \n" + e);

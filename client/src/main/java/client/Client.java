@@ -25,7 +25,7 @@ public class Client implements GameHandler {
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.SIGNEDOUT;
-    private final WebSocketFacade websocket;
+    private WebSocketFacade websocket;
     private ChessGame.TeamColor team = ChessGame.TeamColor.WHITE;
     private Integer inGameID = null;
     private boolean observing = false;
@@ -33,7 +33,6 @@ public class Client implements GameHandler {
 
     public Client (String serverUrl) throws ResponseException{
         server = new ServerFacade(serverUrl);
-        websocket = new WebSocketFacade();
         this.serverUrl = serverUrl;
     }
 
@@ -182,6 +181,7 @@ public class Client implements GameHandler {
         assertSignedIn();
         gameCheck("You can't leave a game right now");
         websocket.leaveGame(authToken, gameList.get(inGameID));
+        websocket = null;
         leaveGameReset();
 
         return "You left the game";
@@ -320,6 +320,7 @@ public class Client implements GameHandler {
             team = teamColor;
             inGameID = Integer.parseInt(params[1]);
             System.out.println(SET_TEXT_COLOR_GREEN + "JOINED GAME" + RESET_TEXT_COLOR);
+            websocket = new WebSocketFacade();
             websocket.connect(authToken, gameList.get(inGameID));
             return String.format("%s joined the game!\n", visitorName);
         }
