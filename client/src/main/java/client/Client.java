@@ -2,6 +2,7 @@ package client;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Scanner;
 
 import chess.ChessGame;
 import chess.ChessMove;
@@ -77,6 +78,9 @@ public class Client implements GameHandler {
                 default -> help();
             };
         } catch (ResponseException ex) {
+            if (ex.getMessage().length() > 125){
+                throw new ResponseException(400, "Error, invalid!");
+            }
             throw new ResponseException(400, ex.getMessage());
         }
     }
@@ -139,7 +143,7 @@ public class Client implements GameHandler {
 
             ChessPiece.PieceType promoPiece = null;
             if (stringMove.length() == 5){
-                promoPiece = shortcutToPiece(String.valueOf(stringMove.charAt(5)));
+                promoPiece = shortcutToPiece(String.valueOf(stringMove.charAt(4)));
             }
             if (!inBounds(startRow, startCol) || !inBounds(endRow, endCol)){
                 throw new ResponseException(400, "Invalid makemove Input.");
@@ -199,7 +203,7 @@ public class Client implements GameHandler {
         String stringMove = params[0];
         if (!(stringMove.length() == 4 || stringMove.length() == 5)) {
             throw new ResponseException(401, "Invalid makemove Input. Try: makemove <chessmove>," +
-                    "\n(ex. <e2e4> or <f3h3>");
+                    "\n(ex. <e2e4> or <f3h3> or <b7b8Q> for a promotion to Queen");
         }
 
         ChessMove move = chessNotationProcessor(stringMove);
@@ -212,8 +216,16 @@ public class Client implements GameHandler {
     public String clientResign() throws ResponseException{
         assertSignedIn();
         gameCheck("You can't resign right now");
-        websocket.resignGame(authToken,gameList.get(inGameID));
-        return "You resigned";
+        Scanner scanner = new Scanner(System.in);
+        System.out.println(SET_TEXT_COLOR_RED + "Are you sure you want to resign? Y/N" + RESET_TEXT_COLOR);
+        String line = scanner.nextLine();
+        if (line.equalsIgnoreCase("Y")) {
+            websocket.resignGame(authToken, gameList.get(inGameID));
+            return "You resigned";
+        } else {
+           return "answer was not 'Y' or 'y', resignation cancelled";
+        }
+
     }
 
     public String clientShowLegalMoves(String... params) throws ResponseException{

@@ -54,12 +54,12 @@ public class WebSocketHandler {
                 throw new ResponseException(500, "Failed to send error to client: " + e.getMessage());
             }
             throwable.printStackTrace();
-            throw new ResponseException(400, "Websocket onError Error: " + throwable.toString());
+//            throw new ResponseException(400, "Websocket onError Error: " + throwable.toString());
         }
 
         @OnWebSocketMessage
         public void onMessage(Session session, String userCommandJson) throws ResponseException{
-//            System.out.println("MADE IT TO WEBSOCKET ONMESSAGE");
+            System.out.println("MADE IT TO WEBSOCKET ONMESSAGE");
             try {
                 UserGameCommand command = new Gson().fromJson(userCommandJson, UserGameCommand.class);
                 AuthData auth = authDAO.getAuth(command.getAuthToken());
@@ -76,9 +76,13 @@ public class WebSocketHandler {
                     case LEAVE -> leaveGame(command, session);
                     case RESIGN -> resignGame(command, session);
                 }
-            } catch (Exception e){
-                System.out.println("\n\n" + e.getMessage() + "\n\n");
-                throw new ResponseException(405, "onMessage error: " + e.getMessage());
+            } catch (Exception ex){
+                try{
+                    ErrorMessage errMessage = new ErrorMessage("Error: " + ex.getMessage());
+                    session.getRemote().sendString(new Gson().toJson(errMessage));
+                } catch (IOException e) {
+                    throw new ResponseException(500, "Failed to send error to client: " + e.getMessage());
+                }
             }
         }
 
@@ -126,17 +130,19 @@ public class WebSocketHandler {
                 // if in check, checkmate, or stalemate, make notification. Mark game as over if game ended.
                 NotificationMessage checkNotification = null;
                 if (game.isInCheckmate(ChessGame.TeamColor.WHITE)){
-                    checkNotification = new NotificationMessage("Black Wins!");
+                    checkNotification = new NotificationMessage(gameData.blackUsername() + " put " + gameData.whiteUsername() + " in Checkmate!" +  "\nBlack Wins!");
                     game.gameOver();
                 } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)){
-                    checkNotification = new NotificationMessage("White Wins!");
+                    checkNotification = new NotificationMessage(gameData.whiteUsername() + " put " + gameData.blackUsername() + " in Checkmate!" +  "\nWhite Wins!");
                     game.gameOver();
                 } else if ((game.isInStalemate(ChessGame.TeamColor.WHITE) && game.getTeamTurn() == ChessGame.TeamColor.WHITE) ||
                         (game.isInStalemate(ChessGame.TeamColor.BLACK) && game.getTeamTurn() == ChessGame.TeamColor.BLACK)){
                     checkNotification = new NotificationMessage("Stalemate!");
                     game.gameOver();
-                } else if (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)) {
-                    checkNotification = new NotificationMessage("Check");
+                } else if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
+                    checkNotification = new NotificationMessage(gameData.whiteUsername() + "is in Check");
+                } else if (game.isInCheck(ChessGame.TeamColor.BLACK)){
+                    checkNotification = new NotificationMessage(gameData.blackUsername() + "is in Check");
                 }
 
                 // make the move in the database
@@ -146,11 +152,13 @@ public class WebSocketHandler {
 
                 // send the updated chessboard to everyone in the game
                 LoadGameMessage gameMessage = new LoadGameMessage(gameAfterUpdate.chessGame());
+                String turnUser = (game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? gameData.blackUsername() : gameData.whiteUsername();
                 broadcastMessage(gameData.gameID(), gameMessage, rootSession, false);
 
                 // make and send move notification to everyone else
                 String moveString = game.toChessNotation(moveCommand.getMove());
-                broadcastMessage(gameData.gameID(), new NotificationMessage(moveString), rootSession, true);
+
+                broadcastMessage(gameData.gameID(), new NotificationMessage(turnUser + " made move : " + moveString), rootSession, true);
 
                 // send notification for check, checkmate, or stalemate
                 if (checkNotification != null){

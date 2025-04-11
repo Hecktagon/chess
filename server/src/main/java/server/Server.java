@@ -47,7 +47,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // WebSocket Endpoint here
-        System.out.println("MADE IT TO WEBSOCKET ENDPOINT");
+//        System.out.println("MADE IT TO WEBSOCKET ENDPOINT");
         Spark.webSocket("/ws", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
