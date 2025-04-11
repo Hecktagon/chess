@@ -42,14 +42,20 @@ public class DisplayChessBoard {
     {"P", "P", "P", "P", "P", "P", "P", "P"},
     {"R", "N", "B", "Q", "K", "B", "N", "R"}};
 
-    public static String[][] flipBoard(String[][] stringBoard) {
+
+
+    public static String[][] flipBoard(String[][] stringBoard, boolean white) {
         int rows = stringBoard.length;
         int cols = stringBoard[0].length;
         String[][] flippedBoard = new String[rows][cols];
 
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                flippedBoard[rows - 1 - i][j] = stringBoard[i][j];
+        for (int i = rows-1; i >= 0 ; i--) {
+            for (int j = cols-1; j >= 0; j--) {
+                if (white) {
+                    flippedBoard[rows - 1 - i][j] = stringBoard[i][j];
+                } else {
+                    flippedBoard[i][cols - 1 - j] = stringBoard[i][j];
+                }
             }
         }
         return flippedBoard;
@@ -186,13 +192,14 @@ public class DisplayChessBoard {
 
         if (color == ChessGame.TeamColor.BLACK){
             white = false;
+            stringBoard = flipBoard(stringBoard, white);
             colLabels = new String[]{" h\u2003", " g\u2003", " f\u2003", " e\u2003", " d\u2003", " c\u2003", " b\u2003", " a\u2003"};
             rowLabels = new String[]{" 1\u2003", " 2\u2003", " 3\u2003", " 4\u2003", " 5\u2003", " 6\u2003", " 7\u2003", " 8\u2003"};
         } else {
-            stringBoard = flipBoard(stringBoard);
+            stringBoard = flipBoard(stringBoard, white);
             colLabels = new String[]{" a\u2003", " b\u2003", " c\u2003", " d\u2003", " e\u2003", " f\u2003", " g\u2003", " h\u2003"};
             rowLabels = new String[]{" 8\u2003", " 7\u2003", " 6\u2003", " 5\u2003", " 4\u2003", " 3\u2003", " 2\u2003", " 1\u2003"};
         }
-        printHelper(stringBoard, rowLabels, colLabels, white);
+        printHelper(stringBoard, rowLabels, colLabels, true);
     }
 }

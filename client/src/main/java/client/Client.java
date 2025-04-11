@@ -38,9 +38,10 @@ public class Client implements GameHandler {
 
     @Override
     public void updateGame(ChessGame game, ChessPosition posValids){
-        System.out.println(SET_TEXT_COLOR_GREEN + "UPDATING GAME" + RESET_TEXT_COLOR);
+//        System.out.println(SET_TEXT_COLOR_GREEN + "UPDATING GAME" + RESET_TEXT_COLOR);
         curGame = game;
         DisplayChessBoard.printChessGame(game, team, posValids);
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> ");
     }
 
     @Override
@@ -50,6 +51,7 @@ public class Client implements GameHandler {
         } else {
             System.out.print("\n" + RESET_TEXT_COLOR + message);
         }
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> ");
     }
 
     public String eval(String input) throws ResponseException {
@@ -120,7 +122,7 @@ public class Client implements GameHandler {
 
     private ChessPosition chessPositionProcessor(String stringPos)throws ResponseException{
         String strCol = String.valueOf(stringPos.charAt(0));
-        Integer row = (int) stringPos.charAt(1);
+        Integer row = Integer.parseInt(String.valueOf(stringPos.charAt(1)));
         Integer col = letterToCol(strCol);
         return new ChessPosition(row, col);
     }
@@ -129,15 +131,15 @@ public class Client implements GameHandler {
         ChessMove move;
         try {
             String startStrCol = String.valueOf(stringMove.charAt(0));
-            Integer startRow = (int) stringMove.charAt(1);
+            Integer startRow = Integer.parseInt(String.valueOf(stringMove.charAt(1)));
             Integer startCol = letterToCol(startStrCol);
-            String endStrCol = String.valueOf(stringMove.charAt(3));
-            Integer endRow = (int) stringMove.charAt(4);
+            String endStrCol = String.valueOf(stringMove.charAt(2));
+            Integer endRow =  Integer.parseInt(String.valueOf(stringMove.charAt(3)));
             Integer endCol = letterToCol(endStrCol);
-            ChessPiece.PieceType promoPiece = null;
 
-            if (stringMove.length() == 7){
-                promoPiece = shortcutToPiece(String.valueOf(stringMove.charAt(6)));
+            ChessPiece.PieceType promoPiece = null;
+            if (stringMove.length() == 5){
+                promoPiece = shortcutToPiece(String.valueOf(stringMove.charAt(5)));
             }
             if (!inBounds(startRow, startCol) || !inBounds(endRow, endCol)){
                 throw new ResponseException(400, "Invalid makemove Input.");
@@ -146,7 +148,7 @@ public class Client implements GameHandler {
             move = new ChessMove(new ChessPosition(startRow, startCol), new ChessPosition(endRow, endCol), promoPiece);
         } catch(Exception e) {
             throw new ResponseException(400, "Invalid makemove Input. Try: makemove <chessmove>," +
-                    "\n(ex. <e2 e4> or <f3 h3> or <b7 b8 Q> for a promotion to Queen");
+                    "\n(ex. <e2e4> or <f3h3> or <b7b8Q> for a promotion to Queen");
         }
         return move;
     }
@@ -191,13 +193,13 @@ public class Client implements GameHandler {
         assertSignedIn();
         if (params.length != 1){
             throw new ResponseException(400, "Invalid makemove Input. Try: makemove <chessmove>," +
-                    "\n(ex. <e2 e4> or <f3 h3> or <b7 b8 Q> for a promotion to Queen");
+                    "\n(ex. <e2e4> or <f3h3> or <b7b8Q> for a promotion to Queen");
         }
         gameCheck("You can't make a move right now");
         String stringMove = params[0];
-        if (!(stringMove.length() == 5 || stringMove.length() == 7)) {
+        if (!(stringMove.length() == 4 || stringMove.length() == 5)) {
             throw new ResponseException(401, "Invalid makemove Input. Try: makemove <chessmove>," +
-                    "\n(ex. <e2 e4> or <f3 h3>");
+                    "\n(ex. <e2e4> or <f3h3>");
         }
 
         ChessMove move = chessNotationProcessor(stringMove);
@@ -319,8 +321,8 @@ public class Client implements GameHandler {
             }
             team = teamColor;
             inGameID = Integer.parseInt(params[1]);
-            System.out.println(SET_TEXT_COLOR_GREEN + "JOINED GAME" + RESET_TEXT_COLOR);
-            websocket = new WebSocketFacade();
+//            System.out.println(SET_TEXT_COLOR_GREEN + "JOINED GAME" + RESET_TEXT_COLOR);
+            websocket = new WebSocketFacade(this);
             websocket.connect(authToken, gameList.get(inGameID));
             return String.format("%s joined the game!\n", visitorName);
         }
@@ -340,6 +342,7 @@ public class Client implements GameHandler {
                         "Invalid Observe Game Input, gameID must be numeric. Try: observe <gameID>");
             }
             inGameID = Integer.parseInt(params[0]);
+            websocket = new WebSocketFacade(this);
             websocket.connect(authToken, gameList.get(inGameID));
             observing = true;
             return String.format("%s is observing the game", visitorName);

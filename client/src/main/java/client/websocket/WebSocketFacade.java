@@ -22,11 +22,13 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
         public Session session;
         GameHandler gameHandler;
 
-        public WebSocketFacade() throws ResponseException{
+        public WebSocketFacade(GameHandler client) throws ResponseException{
             try {
+                gameHandler = client;
                 URI uri = new URI("ws://localhost:8080/ws");
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();
                 this.session = container.connectToServer(this, uri);
+                this.session.addMessageHandler(this);
             }catch (Exception e){
                 throw new ResponseException(500, "Error: Websocket connection failed: \n" + e);
             }
@@ -37,7 +39,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
 
     // OUTGOING MESSAGES TO SERVER
         public void connect(String authToken, Integer gameID) throws ResponseException{
-            System.out.println(SET_TEXT_COLOR_GREEN + "CONNECTING TO GAME" + RESET_TEXT_COLOR);
+//            System.out.println(SET_TEXT_COLOR_GREEN + "CONNECTING TO GAME" + RESET_TEXT_COLOR);
             UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
             sendMessage(new Gson().toJson(command));
         }
@@ -66,7 +68,7 @@ public class WebSocketFacade extends Endpoint implements MessageHandler.Whole<St
     // PROCESS INCOMING MESSAGES FROM SERVER:
         @Override
         public void onMessage(String message){
-            System.out.println(SET_TEXT_COLOR_GREEN + "RECEIVED MESSAGE FROM SERVER" + RESET_TEXT_COLOR);
+//            System.out.println(SET_TEXT_COLOR_GREEN + "RECEIVED MESSAGE FROM SERVER" + RESET_TEXT_COLOR);
             ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
             if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME){
                 LoadGameMessage gameMessage = new Gson().fromJson(message, LoadGameMessage.class);
