@@ -28,11 +28,6 @@ public class Repl {
                 result = client.eval(line);
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
                 String[] lineList = line.toLowerCase().split( " ");
-//                if(Objects.equals(lineList[0], "play") && Objects.equals(lineList[1], "black")){
-//                    printGame(null, "black");
-//                } else if (Objects.equals(lineList[0], "play") || Objects.equals(lineList[0], "observe")) {
-//                    printGame(null, "white");
-//                }
             } catch (Throwable e) {
                 var msg = e.getMessage();
                 System.out.print(SET_TEXT_COLOR_RED + msg);
