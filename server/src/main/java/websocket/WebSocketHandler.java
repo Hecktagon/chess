@@ -130,10 +130,12 @@ public class WebSocketHandler {
                 // if in check, checkmate, or stalemate, make notification. Mark game as over if game ended.
                 NotificationMessage checkNotification = null;
                 if (game.isInCheckmate(ChessGame.TeamColor.WHITE)){
-                    checkNotification = new NotificationMessage(gameData.blackUsername() + " put " + gameData.whiteUsername() + " in Checkmate!" +  "\nBlack Wins!");
+                    checkNotification = new NotificationMessage(gameData.blackUsername() + " put " +
+                            gameData.whiteUsername() + " in Checkmate!" +  "\nBlack Wins!");
                     game.gameOver();
                 } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)){
-                    checkNotification = new NotificationMessage(gameData.whiteUsername() + " put " + gameData.blackUsername() + " in Checkmate!" +  "\nWhite Wins!");
+                    checkNotification = new NotificationMessage(gameData.whiteUsername() + " put " +
+                            gameData.blackUsername() + " in Checkmate!" +  "\nWhite Wins!");
                     game.gameOver();
                 } else if ((game.isInStalemate(ChessGame.TeamColor.WHITE) && game.getTeamTurn() == ChessGame.TeamColor.WHITE) ||
                         (game.isInStalemate(ChessGame.TeamColor.BLACK) && game.getTeamTurn() == ChessGame.TeamColor.BLACK)){
